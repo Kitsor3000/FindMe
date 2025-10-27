@@ -2,19 +2,27 @@
 {% block content %}
 <div class="row justify-content-center">
   <div class="col-md-4">
-    <h3 class="mb-3">Вхід</h3>
-    <form method="post">
-      {% csrf_token %}
-      <div class="mb-3">
-        <label>Ім'я користувача</label>
-        <input type="text" name="username" class="form-control" required>
-      </div>
-      <div class="mb-3">
-        <label>Пароль</label>
-        <input type="password" name="password" class="form-control" required>
-      </div>
-      <button type="submit" class="btn btn-primary w-100">Увійти</button>
-    </form>
+    <div class="card p-4 shadow-sm">
+      <h3 class="mb-3 text-center">Вхід</h3>
+
+      {% if form.errors %}
+        <div class="alert alert-danger text-center">
+          Невірні дані або користувач не існує.
+          <a href="{% url 'register' %}" class="alert-link">Зареєструватись</a>
+        </div>
+      {% endif %}
+
+      <form method="post" action="">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit" class="btn btn-primary w-100">Увійти</button>
+      </form>
+
+      <p class="text-center mt-3">
+        Не маєте акаунта?
+        <a href="{% url 'register' %}">Створити</a>
+      </p>
+    </div>
   </div>
 </div>
 {% endblock %}

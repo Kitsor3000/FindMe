@@ -2,6 +2,7 @@ from rest_framework import viewsets, filters, permissions
 from django_filters.rest_framework import DjangoFilterBackend
 from .models import MissingPerson
 from .serializers import MissingPersonSerializer
+from django.contrib import messages
 
 # --- REST API ---
 class MissingPersonViewSet(viewsets.ModelViewSet):
@@ -51,3 +52,32 @@ def add_missing_person(request):
     else:
         form = MissingPersonForm()
     return render(request, 'add_missing.html', {'form': form})
+
+
+@login_required
+def edit_missing_person(request, pk):
+    person = get_object_or_404(MissingPerson, pk=pk)
+    if request.user != person.user and not request.user.is_superuser:
+        messages.error(request, "Ви не можете редагувати це оголошення.")
+        return redirect('home')
+
+    if request.method == 'POST':
+        form = MissingPersonForm(request.POST, request.FILES, instance=person)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Оголошення оновлено.")
+            return redirect('missing_detail', pk=pk)
+    else:
+        form = MissingPersonForm(instance=person)
+    return render(request, 'add_missing.html', {'form': form, 'edit': True})
+
+
+@login_required
+def delete_missing_person(request, pk):
+    person = get_object_or_404(MissingPerson, pk=pk)
+    if request.user == person.user or request.user.is_superuser:
+        person.delete()
+        messages.success(request, "Оголошення видалено.")
+    else:
+        messages.error(request, "Ви не можете видалити це оголошення.")
+    return redirect('home')

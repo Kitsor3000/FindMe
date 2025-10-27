@@ -2,33 +2,83 @@
 <html lang="uk">
 <head>
   <meta charset="UTF-8">
-  <title>FindMe</title>
+  <title>FindMe — Пошук зниклих людей</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body {
+      background-color: #f8f9fa;
+    }
+    .navbar {
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    .card {
+      border: none;
+      border-radius: 10px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+      transition: transform 0.2s ease;
+    }
+    .card:hover {
+      transform: translateY(-4px);
+    }
+    footer {
+      margin-top: 50px;
+      background-color: #212529;
+      color: #ddd;
+      padding: 20px 0;
+    }
+    footer a {
+      color: #fff;
+      text-decoration: none;
+      margin: 0 10px;
+    }
+  </style>
 </head>
+
 <body>
-  <nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-4">
-  <div class="container">
-    <a class="navbar-brand" href="/">FindMe</a>
+  <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <div class="container">
+      <a class="navbar-brand fw-bold" href="/">🕵️‍♂️ FindMe</a>
 
-    <div class="d-flex">
-      {% if user.is_authenticated %}
-        <a href="/my-posts/" class="btn btn-outline-light me-2">Мої оголошення</a>
-        <a href="/add/" class="btn btn-success me-2">+ Додати</a>
-        <a href="/logout/" class="btn btn-danger">Вийти</a>
-      {% else %}
-        <a href="/login/" class="btn btn-outline-light">Увійти</a>
-      {% endif %}
+      <div class="d-flex">
+        <a href="/about/" class="btn btn-link text-light me-2">Про нас</a>
+        <a href="/contacts/" class="btn btn-link text-light me-3">Контакти</a>
+
+        {% if user.is_authenticated %}
+          <a href="/my-posts/" class="btn btn-outline-light me-2">Мої оголошення</a>
+          <a href="/add/" class="btn btn-success me-2">+ Додати</a>
+          <a href="/logout/" class="btn btn-danger">Вийти</a>
+        {% else %}
+          <a href="/login/" class="btn btn-outline-light me-2">Увійти</a>
+          <a href="/register/" class="btn btn-primary">Реєстрація</a>
+        {% endif %}
+      </div>
     </div>
-  </div>
-</nav>
+  </nav>
 
-
-  <div class="container">
+  <div class="container mt-4">
     {% block content %}{% endblock %}
+    {% if messages %}
+    {% for message in messages %}
+      <div class="alert alert-{{ message.tags }} mt-2">{{ message }}</div>
+    {% endfor %}
+  {% endif %}
   </div>
 
-  <footer class="text-center mt-5 py-3 text-muted">
-    © 2025 FindMe | Пошук зниклих людей
+
+  <footer class="text-center mt-5">
+    <p>© 2025 FindMe | Вебсервіс для пошуку зниклих людей</p>
+    <p>
+      <a href="/about/">Про нас</a> | 
+      <a href="/contacts/">Контакти</a>
+    </p>
   </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+  setTimeout(() => {
+    document.querySelectorAll('.alert').forEach(el => el.remove());
+  }, 3000);
+</script>
+
 </body>
 </html>

@@ -10,7 +10,16 @@
     <p><strong>Місто:</strong> {{ person.city }}</p>
     <p><strong>Дата зникнення:</strong> {{ person.missing_date }}</p>
     <p><strong>Опис:</strong> {{ person.description }}</p>
+
+    {% if user == person.user or user.is_superuser %}
+    <div class="mt-3">
+      <a href="{% url 'edit_missing' person.pk %}" class="btn btn-warning me-2">✏️ Редагувати</a>
+      <a href="{% url 'delete_missing' person.pk %}" class="btn btn-danger"
+         onclick="return confirm('Ви впевнені, що хочете видалити це оголошення?')">🗑️ Видалити</a>
+    </div>
+    {% endif %}
   </div>
 </div>
+
 <a href="/" class="btn btn-secondary mt-3">← Назад</a>
 {% endblock %}
