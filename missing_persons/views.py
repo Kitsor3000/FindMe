@@ -34,6 +34,12 @@ def missing_detail(request, pk):
     return render(request, 'missing_detail.html', {'person': person})
 
 @login_required
+
+def my_posts(request):
+    persons = MissingPerson.objects.filter(user=request.user)
+    return render(request, 'my_posts.html', {'persons': persons})
+
+
 def add_missing_person(request):
     if request.method == 'POST':
         form = MissingPersonForm(request.POST, request.FILES)

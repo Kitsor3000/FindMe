@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+{% block content %}
+<h2>Мої оголошення</h2>
+
+{% if persons %}
+  <div class="row mt-3">
+    {% for p in persons %}
+    <div class="col-md-4 mb-4">
+      <div class="card">
+        {% if p.photo %}
+        <img src="{{ p.photo.url }}" class="card-img-top" alt="{{ p.full_name }}">
+        {% endif %}
+        <div class="card-body">
+          <h5>{{ p.full_name }}</h5>
+          <p>{{ p.city }}, {{ p.region }}</p>
+          <a href="{% url 'missing_detail' p.pk %}" class="btn btn-primary">Детальніше</a>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+{% else %}
+  <p>У вас ще немає створених оголошень.</p>
+{% endif %}
+{% endblock %}

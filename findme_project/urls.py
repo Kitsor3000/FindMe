@@ -1,5 +1,8 @@
 from django.contrib import admin
 from django.urls import path, include
+from django.contrib.auth import views as auth_views
+from django.contrib.auth import logout
+from django.shortcuts import redirect
 
 from rest_framework_simplejwt.views import (
     TokenObtainPairView,
@@ -9,6 +12,9 @@ from rest_framework_simplejwt.views import (
 from django.views.generic import TemplateView
 from missing_persons import views as mp_views
 
+def logout_view(request):
+    logout(request)
+    return redirect('home')
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -21,6 +27,12 @@ urlpatterns = [
 
     # Додавання нового оголошення
     path('add/', mp_views.add_missing_person, name='add_missing'),
+
+     path('login/', auth_views.LoginView.as_view(template_name='login.html'), name='login'),
+    path('logout/', logout_view, name='logout'),
+    path('my-posts/', mp_views.my_posts, name='my_posts'),
+
+
 
     # JWT + API маршрути
     path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
