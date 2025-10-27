@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+{% block content %}
+<h2>Оголошення про зниклих людей</h2>
+
+<form method="get" class="my-3">
+  <input type="text" name="q" class="form-control" placeholder="Пошук за іменем..." value="{{ request.GET.q }}">
+</form>
+
+<div class="row">
+  {% for p in persons %}
+  <div class="col-md-4 mb-4">
+    <div class="card">
+      {% if p.photo %}
+      <img src="{{ p.photo.url }}" class="card-img-top" alt="Фото {{ p.full_name }}">
+      {% endif %}
+      <div class="card-body">
+        <h5 class="card-title">{{ p.full_name }}</h5>
+        <p class="card-text">{{ p.region }}, {{ p.city }}</p>
+        <a href="{% url 'missing_detail' p.pk %}" class="btn btn-primary">Детальніше</a>
+      </div>
+    </div>
+  </div>
+  {% empty %}
+  <p>Оголошення відсутні.</p>
+  {% endfor %}
+</div>
+{% endblock %}

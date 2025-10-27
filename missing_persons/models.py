@@ -15,7 +15,7 @@ class MissingPerson(models.Model):
     region = models.CharField(max_length=100)
     city = models.CharField(max_length=100)
     description = models.TextField()
-    photo = models.ImageField(upload_to='missing_persons/')
+    photo = models.ImageField(upload_to='missing_persons/', blank=True, null=True)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='active')
     created_at = models.DateTimeField(auto_now_add=True)
 
