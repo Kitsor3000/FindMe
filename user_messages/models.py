@@ -9,4 +9,4 @@ class Message(models.Model):
     is_read = models.BooleanField(default=False)
 
     def __str__(self):
-        return f"Повідомлення від {self.sender.username} до {self.receiver.username}"
+        return f"{self.sender.username} → {self.receiver.username}: {self.text[:30]}"

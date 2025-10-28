@@ -63,7 +63,7 @@ INSTALLED_APPS += [
     'users',
     'missing_persons',
     'comments',
-    'messages',
+    'user_messages',
 ]
 
 

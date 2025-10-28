@@ -3,6 +3,7 @@ from django_filters.rest_framework import DjangoFilterBackend
 from .models import MissingPerson
 from .serializers import MissingPersonSerializer
 from django.contrib import messages
+from comments.models import Comment
 
 # --- REST API ---
 class MissingPersonViewSet(viewsets.ModelViewSet):
@@ -32,7 +33,15 @@ def home_page(request):
 
 def missing_detail(request, pk):
     person = get_object_or_404(MissingPerson, pk=pk)
-    return render(request, 'missing_detail.html', {'person': person})
+    comments = person.comments.all().order_by('-created_at')
+
+    if request.method == 'POST' and request.user.is_authenticated:
+        text = request.POST.get('text')
+        if text.strip():
+            Comment.objects.create(user=request.user, person=person, text=text)
+
+    return render(request, 'missing_detail.html', {'person': person, 'comments': comments})
+
 
 @login_required
 

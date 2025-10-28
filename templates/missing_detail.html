@@ -22,4 +22,29 @@
 </div>
 
 <a href="/" class="btn btn-secondary mt-3">← Назад</a>
+
+<hr class="my-4">
+
+<!-- 💬 Коментарі -->
+<h4>Коментарі</h4>
+
+{% if user.is_authenticated %}
+<form method="post" class="mb-3">
+  {% csrf_token %}
+  <textarea name="text" class="form-control" rows="3" placeholder="Залиште коментар..." required></textarea>
+  <button type="submit" class="btn btn-primary mt-2">Надіслати</button>
+</form>
+{% else %}
+<p><a href="/login/">Увійдіть</a>, щоб залишити коментар.</p>
+{% endif %}
+
+{% for c in comments %}
+  <div class="border rounded p-2 mb-2 bg-light">
+    <strong>{{ c.user.username }}</strong>
+    <small class="text-muted">{{ c.created_at|date:"d.m.Y H:i" }}</small>
+    <p class="mb-0">{{ c.text }}</p>
+  </div>
+{% empty %}
+  <p>Коментарів поки немає.</p>
+{% endfor %}
 {% endblock %}

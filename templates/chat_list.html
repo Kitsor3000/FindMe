@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+{% block content %}
+<h3>Чат</h3>
+<p>Виберіть користувача для спілкування:</p>
+<ul class="list-group">
+  {% for u in users %}
+    <li class="list-group-item d-flex justify-content-between align-items-center">
+      <a href="{% url 'chat_detail' u.username %}">{{ u.username }}</a>
+    </li>
+  {% empty %}
+    <li class="list-group-item">Інших користувачів поки немає.</li>
+  {% endfor %}
+</ul>
+{% endblock %}

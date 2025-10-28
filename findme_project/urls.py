@@ -4,6 +4,7 @@ from django.contrib.auth import views as auth_views
 from django.contrib.auth import logout
 from django.shortcuts import redirect
 from users import views as user_views
+from user_messages import views as msg_view
 
 from rest_framework_simplejwt.views import (
     TokenObtainPairView,
@@ -47,7 +48,9 @@ path('person/<int:pk>/delete/', mp_views.delete_missing_person, name='delete_mis
    path('', include('users.urls')),
     path('api/', include('missing_persons.urls')),
     path('api/', include('comments.urls')),
-    path('api/', include('messages.urls')),
+    path('api/', include('user_messages.urls')),
+
+      path('chat/', include('user_messages.urls')),
 ]
 
 from django.conf import settings
