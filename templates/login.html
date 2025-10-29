@@ -1,26 +1,25 @@
 {% extends 'base.html' %}
 {% block content %}
-<div class="row justify-content-center">
+<div class="row justify-content-center mt-5">
   <div class="col-md-4">
     <div class="card p-4 shadow-sm">
-      <h3 class="mb-3 text-center">Вхід</h3>
+      <h3 class="text-center mb-4">Вхід у систему</h3>
 
       {% if form.errors %}
-        <div class="alert alert-danger text-center">
-          Невірні дані або користувач не існує.
-          <a href="{% url 'register' %}" class="alert-link">Зареєструватись</a>
-        </div>
+      <div class="alert alert-danger text-center">
+        Невірні дані або користувач не існує. <br>
+        <a href="{% url 'register' %}" class="alert-link">Зареєструватись</a>
+      </div>
       {% endif %}
 
-      <form method="post" action="">
+      <form method="post">
         {% csrf_token %}
         {{ form.as_p }}
-        <button type="submit" class="btn btn-primary w-100">Увійти</button>
+        <button type="submit" class="btn btn-primary w-100 mt-3">Увійти</button>
       </form>
 
       <p class="text-center mt-3">
-        Не маєте акаунта?
-        <a href="{% url 'register' %}">Створити</a>
+        Не маєте акаунта? <a href="{% url 'register' %}">Створити</a>
       </p>
     </div>
   </div>

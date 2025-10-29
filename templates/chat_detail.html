@@ -1,52 +1,72 @@
 {% extends 'base.html' %}
 {% block content %}
-<h3>Чат із {{ other_user.username }}</h3>
+<div class="chat-container">
+  <h3 class="mb-3">Чат із {{ other_user.username }}</h3>
 
-<div class="border p-3 mb-3 bg-light rounded" style="height: 400px; overflow-y: auto;">
-  {% for msg in messages %}
-    <div class="mb-3 {% if msg.sender == user %}text-end{% endif %}">
-      <div class="d-inline-block p-2 rounded-3 
-        {% if msg.sender == user %}
-          bg-primary text-white
-        {% else %}
-          bg-secondary text-light
-        {% endif %}" 
-        style="max-width: 70%; position: relative;">
-        <p class="mb-1">{{ msg.text }}</p>
-        <div class="d-flex {% if msg.sender == user %}justify-content-end{% endif %}">
-          <small class="text-muted mt-1" style="font-size: 0.8em;">
-            {{ msg.created_at|date:"H:i" }}
-          </small>
-          {% if msg.sender == user %}
-            <small class="ms-1">
+  <!-- Повідомлення -->
+  <div id="chatBox" class="chat-box mb-3" style="height:400px; overflow-y:auto;">
+    {% for msg in messages %}
+      <div class="mb-2 {% if msg.sender == user %}text-end{% endif %}">
+        <div class="d-inline-block p-2 rounded-3 {% if msg.sender == user %}bg-primary text-white{% else %}bg-secondary text-white{% endif %}" style="max-width:70%;">
+          <p class="mb-1">{{ msg.text }}</p>
+          <small class="opacity-75">{{ msg.created_at|date:"H:i" }}
+            {% if msg.sender == user %}
               {% if msg.is_read %}
-                <span style="color:#4fc3f7;">✔✔</span> <!-- Прочитано -->
+                <span style="color:#4fc3f7;">✔✔</span>
               {% else %}
-                <span style="color:lightgray;">✔</span> <!-- Надіслано -->
+                <span style="color:lightgray;">✔</span>
               {% endif %}
-            </small>
-          {% endif %}
+            {% endif %}
+          </small>
         </div>
       </div>
-    </div>
-  {% empty %}
-    <p class="text-center text-muted">Немає повідомлень.</p>
-  {% endfor %}
+    {% empty %}
+      <p class="text-center text-muted">Немає повідомлень.</p>
+    {% endfor %}
+  </div>
+
+  <!-- Форма -->
+  <form id="chatForm" method="post" class="d-flex gap-2">
+    {% csrf_token %}
+    <input type="text" name="text" id="chatInput" class="form-control" placeholder="Введіть повідомлення..." required>
+    <button class="btn btn-primary" type="submit">➤</button>
+  </form>
+
+  <a href="/chat/" class="btn btn-outline-secondary mt-3">← Назад</a>
 </div>
 
-<form method="post">
-  {% csrf_token %}
-  <div class="input-group">
-    <input type="text" name="text" class="form-control" placeholder="Введіть повідомлення..." required>
-    <button class="btn btn-primary" type="submit">Надіслати</button>
-  </div>
-</form>
-
-<a href="/chat/" class="btn btn-secondary mt-3">← Назад</a>
-
 <script>
-  // автоматична прокрутка вниз до останнього повідомлення
-  const chatBox = document.querySelector('.border');
+  // автопрокрутка вниз
+  const chatBox = document.getElementById('chatBox');
   chatBox.scrollTop = chatBox.scrollHeight;
+
+  // AJAX-відправлення
+  const form = document.getElementById('chatForm');
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const text = document.getElementById('chatInput').value.trim();
+    if (!text) return;
+
+    const formData = new FormData(form);
+    const response = await fetch("", {
+      method: "POST",
+      body: formData,
+      headers: {"X-Requested-With": "XMLHttpRequest"}
+    });
+
+    if (response.ok) {
+      const newMsg = document.createElement('div');
+      newMsg.className = 'text-end mb-2';
+      newMsg.innerHTML = `
+        <div class="d-inline-block p-2 rounded-3 bg-primary text-white" style="max-width:70%;">
+          <p class="mb-1">${text}</p>
+          <small class="opacity-75">${new Date().toLocaleTimeString().slice(0,5)} <span style="color:lightgray;">✔</span></small>
+        </div>
+      `;
+      chatBox.appendChild(newMsg);
+      chatBox.scrollTop = chatBox.scrollHeight;
+      document.getElementById('chatInput').value = '';
+    }
+  });
 </script>
 {% endblock %}

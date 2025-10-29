@@ -1,85 +1,224 @@
+{% load static %}
 <!DOCTYPE html>
-<html lang="uk">
+<html lang="uk" data-theme="light">
 <head>
   <meta charset="UTF-8">
-  <title>FindMe — Пошук зниклих людей</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FindMe</title>
+
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-  <style>
-    body {
-      background-color: #f8f9fa;
-    }
-    .navbar {
-      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-    }
-    .card {
-      border: none;
-      border-radius: 10px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-      transition: transform 0.2s ease;
-    }
-    .card:hover {
-      transform: translateY(-4px);
-    }
-    footer {
-      margin-top: 50px;
-      background-color: #212529;
-      color: #ddd;
-      padding: 20px 0;
-    }
-    footer a {
-      color: #fff;
-      text-decoration: none;
-      margin: 0 10px;
-    }
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+
+ <style>
+  :root {
+    --bg-light: #f3f6fa;
+    --bg-dark: #0b1120;
+    --glass-light: rgba(255, 255, 255, 0.65);
+    --glass-dark: rgba(17, 25, 40, 0.65);
+    --text-light: #0f172a;
+    --text-dark: #f8fafc;
+    --accent: #2563eb;
+    --radius: 16px;
+    --transition: all 0.3s ease;
+  }
+
+  html[data-theme="light"] {
+    --bg: var(--bg-light);
+    --text: var(--text-light);
+    --glass: var(--glass-light);
+  }
+  html[data-theme="dark"] {
+    --bg: var(--bg-dark);
+    --text: var(--text-dark);
+    --glass: var(--glass-dark);
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Poppins', sans-serif;
+    transition: var(--transition);
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    background-image: radial-gradient(at 30% 30%, rgba(37,99,235,0.08), transparent 60%),
+                      radial-gradient(at 70% 70%, rgba(99,102,241,0.1), transparent 60%);
+  }
+
+  a { color: var(--accent); text-decoration: none; transition: var(--transition); }
+  a:hover { text-decoration: none; color: var(--accent); }
+
+  h1, h2, h3, h4, h5, h6, p, small, label, li, span { 
+    color: var(--text); 
+    transition: var(--transition);
+  }
+
+  .text-muted {
+    color: var(--text) !important;
+    opacity: 0.75;
+  }
+
+  /* Navbar */
+  .navbar {
+    backdrop-filter: blur(12px);
+    background-color: var(--glass);
+    border-bottom: 1px solid rgba(255,255,255,0.15);
+  }
+
+  .navbar-brand {
+    font-weight: 700;
+    color: var(--accent) !important;
+  }
+
+  .nav-link {
+    font-weight: 500;
+    color: var(--text) !important;
+  }
+
+  .theme-toggle {
+    border: none;
+    background: transparent;
+    font-size: 1.4rem;
+    cursor: pointer;
+    color: var(--accent);
+  }
+
+  /* Cards */
+  .card {
+    border: none;
+    border-radius: var(--radius);
+    backdrop-filter: blur(20px);
+    background-color: var(--glass);
+    box-shadow: 0 4px 18px rgba(0,0,0,0.1);
+    color: var(--text);
+    transition: none; /* без підскакування */
+  }
+
+  /* Зображення в картках */
+  .card-img-top {
+    height: 250px;
+    object-fit: cover;
+    border-top-left-radius: var(--radius);
+    border-top-right-radius: var(--radius);
+  }
+
+  /* Чат та коментарі */
+  .comment-box, .chat-box {
+    background-color: var(--glass) !important;
+    color: var(--text) !important;
+    border: 1px solid rgba(255,255,255,0.2);
+    border-radius: 12px;
+    padding: 10px 15px;
+  }
+
+  html[data-theme="light"] .chat-box {
+    color: white !important;
+  }
+
+  /* Inputs */
+  input, textarea, select {
+    background-color: rgba(255,255,255,0.5);
+    border: 1px solid rgba(0,0,0,0.1);
+    border-radius: 10px;
+    color: var(--text);
+    transition: var(--transition);
+  }
+
+  input:focus, textarea:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 4px var(--accent);
+  }
+
+  /* Footer */
+  footer {
+    backdrop-filter: blur(10px);
+    background-color: var(--glass);
+    border-top: 1px solid rgba(255,255,255,0.2);
+    padding: 20px;
+    text-align: center;
+    color: var(--text);
+    margin-top: auto;
+  }
+
+  .btn-primary {
+    background-color: var(--accent);
+    border: none;
+    border-radius: 10px;
+  }
+
+  .btn-outline-primary {
+    border: 2px solid var(--accent);
+    color: var(--accent);
+    border-radius: 10px;
+  }
+
+
+    .fade-in { animation: fadeIn 0.6s ease forwards; opacity: 0; }
+    @keyframes fadeIn { to { opacity: 1; transform: none; } from { opacity: 0; transform: translateY(10px); } }
   </style>
 </head>
 
 <body>
-  <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+  <nav class="navbar navbar-expand-lg fixed-top">
     <div class="container">
-      <a class="navbar-brand fw-bold" href="/">🕵️‍♂️ FindMe</a>
+      <a class="navbar-brand d-flex align-items-center" href="/">
+        <i class="bi bi-search-heart me-2"></i> FindMe
+      </a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navMenu">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse justify-content-end" id="navMenu">
+        <ul class="navbar-nav align-items-center gap-2">
+          <li class="nav-item"><a href="/" class="nav-link">Головна</a></li>
+          <li class="nav-item"><a href="/chat/" class="nav-link">Чат</a></li>
+          <li class="nav-item"><a href="/about/" class="nav-link">Про нас</a></li>
+          <li class="nav-item"><a href="/contacts/" class="nav-link">Контакти</a></li>
 
-      <div class="d-flex">
-        <a href="/about/" class="btn btn-link text-light me-2">Про нас</a>
-        <a href="/contacts/" class="btn btn-link text-light me-3">Контакти</a>
-
-        {% if user.is_authenticated %}
-          <a href="/my-posts/" class="btn btn-outline-light me-2">Мої оголошення</a>
-          <a href="/chat/" class="btn btn-outline-light me-2">💬 Чат</a>
-          <a href="/add/" class="btn btn-success me-2">+ Додати</a>
-          <a href="/logout/" class="btn btn-danger">Вийти</a>
-        {% else %}
-          <a href="/login/" class="btn btn-outline-light me-2">Увійти</a>
-          <a href="/register/" class="btn btn-primary">Реєстрація</a>
-        {% endif %}
+          {% if user.is_authenticated %}
+            <li class="nav-item"><a href="/my-posts/" class="nav-link">Мої оголошення</a></li>
+            <li class="nav-item"><a href="/add/" class="btn btn-primary btn-sm me-2"><i class="bi bi-plus-circle"></i> Додати</a></li>
+            <li class="nav-item"><a href="/logout/" class="btn btn-outline-danger btn-sm">Вийти</a></li>
+          {% else %}
+            <li class="nav-item"><a href="/login/" class="btn btn-outline-primary btn-sm">Увійти</a></li>
+          {% endif %}
+          <li class="nav-item">
+            <button id="themeToggle" class="theme-toggle" title="Змінити тему">🌙</button>
+          </li>
+        </ul>
       </div>
     </div>
   </nav>
 
-  <div class="container mt-4">
+  <main class="container mt-5 pt-5 fade-in">
+    {% if messages and request.path not in '/register/' %}
+  {% for message in messages %}
+    <div class="alert alert-{{ message.tags }} mt-2">{{ message }}</div>
+  {% endfor %}
+{% endif %}
+
     {% block content %}{% endblock %}
-    {% if messages %}
-    {% for message in messages %}
-      <div class="alert alert-{{ message.tags }} mt-2">{{ message }}</div>
-    {% endfor %}
-  {% endif %}
-  </div>
+  </main>
 
-
-  <footer class="text-center mt-5">
-    <p>© 2025 FindMe | Вебсервіс для пошуку зниклих людей</p>
-    <p>
-      <a href="/about/">Про нас</a> | 
-      <a href="/contacts/">Контакти</a>
-    </p>
+  <footer>
+    <p>© 2025 FindMe — Вебсервіс для пошуку зниклих людей</p>
   </footer>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
   <script>
-  setTimeout(() => {
-    document.querySelectorAll('.alert').forEach(el => el.remove());
-  }, 3000);
-</script>
+    // Збереження теми
+    const html = document.documentElement;
+    const themeToggle = document.getElementById("themeToggle");
+    const saved = localStorage.getItem("theme") || "light";
+    html.setAttribute("data-theme", saved);
+    themeToggle.textContent = saved === "dark" ? "☀️" : "🌙";
 
+    themeToggle.onclick = () => {
+      const now = html.getAttribute("data-theme") === "dark" ? "light" : "dark";
+      html.setAttribute("data-theme", now);
+      localStorage.setItem("theme", now);
+      themeToggle.textContent = now === "dark" ? "☀️" : "🌙";
+    };
+  </script>
 </body>
 </html>

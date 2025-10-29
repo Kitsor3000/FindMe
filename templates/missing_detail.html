@@ -1,9 +1,14 @@
 {% extends 'base.html' %}
 {% block content %}
-<div class="card">
+<div class="card mb-4">
   {% if person.photo %}
-  <img src="{{ person.photo.url }}" class="card-img-top" alt="{{ person.full_name }}">
-  {% endif %}
+  <div class="text-center mb-3">
+    <img src="{{ person.photo.url }}" alt="{{ person.full_name }}"
+         class="img-fluid rounded-4 shadow-sm"
+         style="max-height: 600px; width: auto; object-fit: cover;">
+  </div>
+{% endif %}
+
   <div class="card-body">
     <h3>{{ person.full_name }}</h3>
     <p><strong>Регіон:</strong> {{ person.region }}</p>
@@ -21,30 +26,31 @@
   </div>
 </div>
 
-<a href="/" class="btn btn-secondary mt-3">← Назад</a>
-
-<hr class="my-4">
+<a href="/" class="btn btn-secondary mb-4">← Назад</a>
 
 <!-- 💬 Коментарі -->
-<h4>Коментарі</h4>
+<div class="card p-3">
+  <h4>Коментарі</h4>
 
-{% if user.is_authenticated %}
-<form method="post" class="mb-3">
-  {% csrf_token %}
-  <textarea name="text" class="form-control" rows="3" placeholder="Залиште коментар..." required></textarea>
-  <button type="submit" class="btn btn-primary mt-2">Надіслати</button>
-</form>
-{% else %}
-<p><a href="/login/">Увійдіть</a>, щоб залишити коментар.</p>
-{% endif %}
+  {% if user.is_authenticated %}
+  <form method="post" class="mb-3">
+    {% csrf_token %}
+    <textarea name="text" class="form-control mb-2" rows="3" placeholder="Залиште коментар..." required></textarea>
+    <button type="submit" class="btn btn-primary w-100">Надіслати</button>
+  </form>
+  {% else %}
+  <p><a href="/login/">Увійдіть</a>, щоб залишити коментар.</p>
+  {% endif %}
 
-{% for c in comments %}
-  <div class="border rounded p-2 mb-2 bg-light">
+  {% for c in comments %}
+  <div class="comment-box mb-3 p-3 rounded-4">
     <strong>{{ c.user.username }}</strong>
-    <small class="text-muted">{{ c.created_at|date:"d.m.Y H:i" }}</small>
-    <p class="mb-0">{{ c.text }}</p>
+    <small class="d-block opacity-75">{{ c.created_at|date:"d.m.Y H:i" }}</small>
+    <p class="mt-2 mb-0">{{ c.text }}</p>
   </div>
 {% empty %}
   <p>Коментарів поки немає.</p>
 {% endfor %}
+
+</div>
 {% endblock %}
