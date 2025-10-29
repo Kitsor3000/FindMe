@@ -2,26 +2,59 @@
 {% block content %}
 <div class="row justify-content-center mt-5">
   <div class="col-md-4">
-    <div class="card p-4 shadow-sm">
-      <h3 class="text-center mb-4">Вхід у систему</h3>
+    <div class="card p-4 shadow-sm rounded-4">
+      <h3 class="text-center mb-4 fw-bold">Вхід у систему</h3>
 
-      {% if form.errors %}
-      <div class="alert alert-danger text-center">
-        Невірні дані або користувач не існує. <br>
-        <a href="{% url 'register' %}" class="alert-link">Зареєструватись</a>
+      {# --- Повідомлення про помилки або підказки --- #}
+      {% if error_message %}
+      <div class="alert alert-danger text-center" style="border-radius: 10px;">
+        {{ error_message|safe }}
       </div>
       {% endif %}
 
-      <form method="post">
+      <form method="post" novalidate>
         {% csrf_token %}
-        {{ form.as_p }}
-        <button type="submit" class="btn btn-primary w-100 mt-3">Увійти</button>
+        <div class="mb-3">
+          <label for="id_username_or_email" class="form-label fw-semibold">Ім’я користувача або пошта</label>
+          <input type="text" id="id_username_or_email" name="username_or_email"
+                 class="form-control rounded-3"
+                 placeholder="Введіть ім’я користувача або email"
+                 required>
+        </div>
+
+        <div class="mb-3 position-relative">
+          <label for="password" class="form-label fw-semibold">Пароль</label>
+          <div class="input-group">
+            <input type="password" name="password" id="password"
+                   class="form-control rounded-start-3"
+                   placeholder="Введіть пароль" required>
+            <button type="button" class="btn btn-outline-secondary rounded-end-3" id="togglePassword" title="Показати пароль">
+              <i class="bi bi-eye"></i>
+            </button>
+          </div>
+        </div>
+
+        <button type="submit" class="btn btn-primary w-100 mt-3 rounded-3 fw-semibold">
+          Увійти
+        </button>
       </form>
 
-      <p class="text-center mt-3">
-        Не маєте акаунта? <a href="{% url 'register' %}">Створити</a>
+      <p class="text-center mt-3 text-muted">
+        Не маєте акаунта?
+        <a href="{% url 'register' %}" class="fw-semibold text-decoration-none">Створити</a>
       </p>
     </div>
   </div>
 </div>
+
+<script>
+  // 👁️ Перемикання видимості пароля
+  document.getElementById('togglePassword').addEventListener('click', function() {
+    const input = document.getElementById('password');
+    const icon = this.querySelector('i');
+    const hidden = input.type === 'password';
+    input.type = hidden ? 'text' : 'password';
+    icon.className = hidden ? 'bi bi-eye-slash' : 'bi bi-eye';
+  });
+</script>
 {% endblock %}

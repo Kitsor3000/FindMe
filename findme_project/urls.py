@@ -5,6 +5,7 @@ from django.contrib.auth import logout
 from django.shortcuts import redirect
 from users import views as user_views
 from user_messages import views as msg_view
+from users import views_auth
 
 from rest_framework_simplejwt.views import (
     TokenObtainPairView,
@@ -30,7 +31,7 @@ urlpatterns = [
     # Додавання нового оголошення
     path('add/', mp_views.add_missing_person, name='add_missing'),
 
-     path('login/', auth_views.LoginView.as_view(template_name='login.html'), name='login'),
+    path('login/', views_auth.login_view, name='login'),
     path('logout/', logout_view, name='logout'),
     path('my-posts/', mp_views.my_posts, name='my_posts'),
 

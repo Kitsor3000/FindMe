@@ -18,6 +18,16 @@
           {% endfor %}
         </div>
 
+        <!-- Email -->
+        <div class="mb-3">
+          <label class="form-label">Електронна пошта</label>
+          <input type="email" name="email" value="{{ form.email.value|default:'' }}" 
+                 class="form-control {% if form.email.errors %}is-invalid{% endif %}" required>
+          {% for error in form.email.errors %}
+            <div class="invalid-feedback d-block">{{ error }}</div>
+          {% endfor %}
+        </div>
+
         <!-- Password -->
         <div class="mb-3 position-relative">
           <label class="form-label">Пароль</label>
@@ -59,15 +69,13 @@
 </div>
 
 <script>
-  // Перемикач видимості пароля
   document.querySelectorAll('.toggle-password').forEach(btn => {
     btn.addEventListener('click', () => {
-      const targetId = btn.dataset.target;
-      const input = document.getElementById(targetId);
+      const input = document.getElementById(btn.dataset.target);
       const icon = btn.querySelector('i');
-      const isHidden = input.type === 'password';
-      input.type = isHidden ? 'text' : 'password';
-      icon.className = isHidden ? 'bi bi-eye-slash' : 'bi bi-eye';
+      const hidden = input.type === 'password';
+      input.type = hidden ? 'text' : 'password';
+      icon.className = hidden ? 'bi bi-eye-slash' : 'bi bi-eye';
     });
   });
 </script>
