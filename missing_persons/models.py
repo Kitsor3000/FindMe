@@ -18,6 +18,10 @@ class MissingPerson(models.Model):
     photo = models.ImageField(upload_to='missing_persons/', blank=True, null=True)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='active')
     created_at = models.DateTimeField(auto_now_add=True)
+    location = models.CharField("Останнє місце, де бачили", max_length=255, blank=True, null=True)
+    latitude = models.FloatField(blank=True, null=True)
+    longitude = models.FloatField(blank=True, null=True)
+
 
     def __str__(self):
         return f"{self.full_name} ({self.region})"

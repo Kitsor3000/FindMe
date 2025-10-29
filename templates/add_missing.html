@@ -8,36 +8,57 @@
       <form method="post" enctype="multipart/form-data" class="needs-validation" novalidate>
         {% csrf_token %}
 
+        <!-- ПІБ -->
         <div class="form-group mb-3">
           <label class="form-label fw-semibold">ПІБ зниклої особи</label>
           {{ form.full_name }}
         </div>
 
+        <!-- Регіон -->
         <div class="form-group mb-3">
           <label class="form-label fw-semibold">Регіон</label>
           {{ form.region }}
         </div>
 
+        <!-- Місто -->
         <div class="form-group mb-3">
           <label class="form-label fw-semibold">Місто</label>
           {{ form.city }}
         </div>
 
+        <!-- Дата зникнення -->
         <div class="form-group mb-3">
           <label class="form-label fw-semibold">Дата зникнення</label>
           {{ form.missing_date }}
         </div>
 
+        <!-- Фото -->
         <div class="form-group mb-3">
           <label class="form-label fw-semibold">Фото</label>
           {{ form.photo }}
         </div>
 
+        <!-- Місце на карті -->
+        <div class="form-group mb-3">
+          <label class="form-label fw-semibold">Останнє місце, де бачили</label>
+          {{ form.location }}
+        </div>
+
+        <!-- 🗺️ Інтерактивна мапа -->
+        <div class="form-group mb-4">
+          <label class="form-label fw-semibold">Оберіть місце на мапі</label>
+          <div id="map" style="height: 300px; border-radius: 12px;"></div>
+          {{ form.latitude }}
+          {{ form.longitude }}
+        </div>
+
+        <!-- Опис -->
         <div class="form-group mb-4">
           <label class="form-label fw-semibold">Опис</label>
           {{ form.description }}
         </div>
 
+        <!-- Кнопка -->
         <button type="submit" class="btn btn-primary w-100 py-2 rounded-3 fw-semibold shadow-sm">
           <i class="bi bi-plus-circle me-1"></i> Зберегти
         </button>
@@ -46,17 +67,57 @@
   </div>
 </div>
 
+<!-- 🗺️ Leaflet -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const map = L.map('map').setView([49.9935, 36.2304], 6); // Центр України
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '&copy; OpenStreetMap contributors'
+  }).addTo(map);
 
+  let marker;
+  map.on('click', function(e) {
+    const { lat, lng } = e.latlng;
+    if (marker) map.removeLayer(marker);
+    marker = L.marker([lat, lng]).addTo(map);
+    document.getElementById('id_latitude').value = lat;
+    document.getElementById('id_longitude').value = lng;
+  });
+});
+</script>
 
 <style>
+  /* 🎨 Базові кольори (світла тема) */
+  :root {
+    --bg-color: #ffffff;
+    --label-text-color: #212529;     
+  --input-text-color: #212529;
+    --input-bg: #f8f9fa;
+    --input-border: rgba(180,180,180,0.4);
+    --card-bg: #ffffff;
+  }
+
+  /* 🌙 Темна тема */
+  [data-theme='dark'] {
+    --bg-color: #121212;
+     --label-text-color: #823232;
+  --input-text-color: #030303;
+    --input-bg: #989898;
+    --input-border: #444;
+    --card-bg: #202845;
+  }
+
   /* Основна форма */
   .form-card {
-    background: var(--bs-body-bg);
+    background: var(--card-bg);
     transition: all 0.3s ease;
+    color: var(--text-color);
   }
 
   .form-label {
-    color: var(--bs-body-color);
+    color: var(--text-color);
   }
 
   input[type="text"],
@@ -64,11 +125,11 @@
   input[type="file"],
   textarea {
     width: 100%;
-    border: 1px solid rgba(180,180,180,0.4);
+    border: 1px solid var(--input-border);
     border-radius: 0.6rem;
     padding: 10px 14px;
-    background-color: var(--bs-body-bg);
-    color: var(--bs-body-color);
+    background-color: var(--input-bg);
+    color: var(--text-color);
     transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.3s ease;
   }
 
@@ -90,59 +151,9 @@
     transform: scale(1.02);
   }
 
-  /* Темна тема */
-  body[data-theme='dark'] {
-    background-color: #121212 !important;
-    color: #f1f1f1 !important;
-  }
-
-  body[data-theme='dark'] .form-card {
-    background-color: #1f1f1f !important;
-    color: #f1f1f1;
-  }
-
-  body[data-theme='dark'] input,
-  body[data-theme='dark'] textarea {
-    background-color: #2a2a2a !important;
-    color: #f1f1f1 !important;
-    border-color: #444;
-  }
-
-  body[data-theme='dark'] .form-label {
-    color: #f1f1f1;
-  }
-
-  body[data-theme='dark'] button.btn-primary {
-    background: linear-gradient(135deg, #3399ff, #007bff);
-  }
-
-  /* Відступ перед футером */
   footer {
-    margin-top: 20px !important;
+    margin-top: 30px !important;
   }
 </style>
 
-<script>
-  // 🌙 Перемикання теми
-  const toggleBtn = document.getElementById('themeToggle');
-  const body = document.body;
-
-  // Якщо тема збережена в localStorage — відновлюємо
-  if (localStorage.getItem('theme') === 'dark') {
-    body.setAttribute('data-theme', 'dark');
-    toggleBtn.innerHTML = '<i class="bi bi-brightness-high"></i> Світла тема';
-  }
-
-  toggleBtn.addEventListener('click', () => {
-    if (body.getAttribute('data-theme') === 'dark') {
-      body.removeAttribute('data-theme');
-      localStorage.setItem('theme', 'light');
-     
-    } else {
-      body.setAttribute('data-theme', 'dark');
-      localStorage.setItem('theme', 'dark');
-     
-    }
-  });
-</script>
 {% endblock %}

@@ -4,8 +4,10 @@ from .models import MissingPerson
 from .serializers import MissingPersonSerializer
 from django.contrib import messages
 from comments.models import Comment
+from django.contrib.auth.decorators import login_required
 
-# --- REST API ---
+
+
 class MissingPersonViewSet(viewsets.ModelViewSet):
     queryset = MissingPerson.objects.all().order_by('-created_at')
     serializer_class = MissingPersonSerializer
@@ -18,9 +20,9 @@ class MissingPersonViewSet(viewsets.ModelViewSet):
         serializer.save(user=self.request.user)
 
 
-# --- HTML В’юхи ---
+
 from django.shortcuts import render, get_object_or_404, redirect
-from django.contrib.auth.decorators import login_required
+
 from .forms import MissingPersonForm
 
 def home_page(request):
@@ -49,7 +51,7 @@ def my_posts(request):
     persons = MissingPerson.objects.filter(user=request.user)
     return render(request, 'my_posts.html', {'persons': persons})
 
-
+@login_required
 def add_missing_person(request):
     if request.method == 'POST':
         form = MissingPersonForm(request.POST, request.FILES)
