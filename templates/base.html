@@ -191,11 +191,7 @@
   </nav>
 
   <main class="container mt-5 pt-5 fade-in">
-    {% if messages and request.path not in '/register/' %}
-  {% for message in messages %}
-    <div class="alert alert-{{ message.tags }} mt-2">{{ message }}</div>
-  {% endfor %}
-{% endif %}
+    
 
     {% block content %}{% endblock %}
   </main>

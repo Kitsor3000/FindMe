@@ -1,31 +1,85 @@
 {% extends 'base.html' %}
 {% block content %}
-<div class="text-center mt-5">
-  <h1 class="fw-bold display-4 mb-3">🔍 FindMe</h1>
-  <p class="lead mb-4 text-muted">Сервіс для пошуку зниклих людей — допоможіть знайти близьких.</p>
-  <a href="/add/" class="btn btn-primary btn-lg shadow-sm">
-    <i class="bi bi-plus-circle"></i> Додати оголошення
-  </a>
-</div>
+<div class="container mb-5">
 
-<hr class="my-5">
+  <div class="text-center mt-5 mb-4">
+    <h1 class="fw-bold display-5 mb-2">🔍 FindMe</h1>
+    <p class="lead mb-4 page-subtitle">
+      Сервіс для пошуку зниклих людей — допоможіть знайти близьких.
+    </p>
+    <a href="/add/" class="btn btn-primary btn-lg shadow-sm">
+      <i class="bi bi-plus-circle"></i> Додати оголошення
+    </a>
+  </div>
 
-<div class="row g-4">
-  {% for person in persons %}
-    <div class="col-md-4">
-      <div class="card h-100">
-        {% if person.photo %}
-          <img src="{{ person.photo.url }}" class="card-img-top rounded-top" alt="{{ person.full_name }}">
-        {% endif %}
-        <div class="card-body">
-          <h5 class="card-title fw-semibold">{{ person.full_name }}</h5>
-          <p class="text-muted small mb-2"><i class="bi bi-geo-alt"></i> {{ person.city }}, {{ person.region }}</p>
-          <a href="{% url 'missing_detail' person.pk %}" class="btn btn-outline-primary w-100">Детальніше</a>
+  <!-- 🔎 Пошук, фільтри та сортування -->
+  <form method="get" id="searchForm" class="row g-3 justify-content-center mb-5">
+    <div class="col-md-3 col-sm-6">
+      <input type="text" name="q" value="{{ query }}" class="form-control rounded-3"
+             placeholder="Пошук за ім’ям...">
+    </div>
+
+    <div class="col-md-3 col-sm-6">
+      <input type="text" name="city" value="{{ city }}" class="form-control rounded-3"
+             placeholder="Місто...">
+    </div>
+
+    <div class="col-md-2 col-sm-6">
+      <input type="date" name="date" value="{{ date }}" class="form-control rounded-3">
+    </div>
+
+    <!-- 🧭 Сортування -->
+    <div class="col-md-3 col-sm-6">
+      <select name="sort" id="sortSelect" class="form-select rounded-3">
+        <option value="">Сортувати за...</option>
+        <option value="name_asc" {% if sort == 'name_asc' %}selected{% endif %}>Ім’ям (A–Я)</option>
+        <option value="name_desc" {% if sort == 'name_desc' %}selected{% endif %}>Ім’ям (Я–A)</option>
+        <option value="date_latest" {% if sort == 'date_latest' %}selected{% endif %}>Датою (спочатку нові)</option>
+        <option value="date_oldest" {% if sort == 'date_oldest' %}selected{% endif %}>Датою (спочатку старі)</option>
+        <option value="city" {% if sort == 'city' %}selected{% endif %}>Містом</option>
+      </select>
+    </div>
+
+    <div class="col-md-1 d-grid">
+      <button type="submit" class="btn btn-primary rounded-3 fw-semibold shadow-sm">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </form>
+
+  <!-- 🧾 Результати -->
+  <div class="row g-4">
+    {% for person in persons %}
+      <div class="col-md-4">
+        <div class="card h-100 shadow-sm border-0 rounded-4 result-card">
+          {% if person.photo %}
+            <img src="{{ person.photo.url }}" class="card-img-top rounded-top-4" alt="{{ person.full_name }}">
+          {% endif %}
+          <div class="card-body">
+            <h5 class="card-title fw-semibold text-primary">{{ person.full_name }}</h5>
+            <p class="text-muted small mb-1">
+              <i class="bi bi-geo-alt"></i> {{ person.city }}, {{ person.region }}
+            </p>
+            <p class="text-muted small mb-2">
+              <i class="bi bi-calendar-event"></i> {{ person.missing_date }}
+            </p>
+            <a href="{% url 'missing_detail' person.pk %}" class="btn btn-outline-primary w-100">
+              Детальніше
+            </a>
+          </div>
         </div>
       </div>
-    </div>
-  {% empty %}
-    <p class="text-center text-muted">Немає оголошень.</p>
-  {% endfor %}
+    {% empty %}
+      <p class="text-center text-muted">Немає оголошень за цими критеріями 😔</p>
+    {% endfor %}
+  </div>
 </div>
+
+<!-- 💡 JS: автоматичне оновлення при зміні сортування -->
+<script>
+  document.getElementById('sortSelect').addEventListener('change', function() {
+    document.getElementById('searchForm').submit();
+  });
+</script>
+
 {% endblock %}

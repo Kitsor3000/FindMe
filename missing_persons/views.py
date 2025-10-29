@@ -5,6 +5,7 @@ from .serializers import MissingPersonSerializer
 from django.contrib import messages
 from comments.models import Comment
 from django.contrib.auth.decorators import login_required
+from django.shortcuts import render
 
 
 
@@ -26,12 +27,49 @@ from django.shortcuts import render, get_object_or_404, redirect
 from .forms import MissingPersonForm
 
 def home_page(request):
-    query = request.GET.get('q')
+    # Отримуємо значення з GET-параметрів
+    query = request.GET.get('q', '').strip()
+    city = request.GET.get('city', '').strip()
+    date = request.GET.get('date', '').strip()
+    sort = request.GET.get("sort", "").strip()
+
+    # Отримуємо всі записи
+    persons = MissingPerson.objects.all().order_by('-created_at')
+
+    # 🔎 Пошук за ім'ям
     if query:
-        persons = MissingPerson.objects.filter(full_name__icontains=query)
+        persons = persons.filter(full_name__icontains=query)
+
+    # 🏙️ Фільтр за містом
+    if city:
+        persons = persons.filter(city__icontains=city)
+
+    # 📅 Фільтр за датою зникнення
+    if date:
+        persons = persons.filter(missing_date=date)
+
+ # 🔽 Сортування
+    if sort == "name_asc":
+        persons = persons.order_by("full_name")
+    elif sort == "name_desc":
+        persons = persons.order_by("-full_name")
+    elif sort == "date_oldest":
+        persons = persons.order_by("missing_date")
+    elif sort == "date_latest":
+        persons = persons.order_by("-missing_date")
+    elif sort == "city":
+        persons = persons.order_by("city")
     else:
-        persons = MissingPerson.objects.all().order_by('-created_at')
-    return render(request, 'home.html', {'persons': persons})
+        persons = persons.order_by("-created_at")
+
+        
+    context = {
+        'persons': persons,
+        'query': query,
+        'city': city,
+        'date': date,
+    }
+    return render(request, 'home.html', context)
 
 def missing_detail(request, pk):
     person = get_object_or_404(MissingPerson, pk=pk)
