@@ -7,6 +7,7 @@ from users import views as user_views
 from user_messages import views as msg_view
 from users import views_auth
 
+
 from rest_framework_simplejwt.views import (
     TokenObtainPairView,
     TokenRefreshView,
@@ -22,13 +23,13 @@ def logout_view(request):
 urlpatterns = [
     path('admin/', admin.site.urls),
 
-    # Головна сторінка
+    
     path('', mp_views.home_page, name='home'),
 
-    # Перегляд деталей
+   
     path('person/<int:pk>/', mp_views.missing_detail, name='missing_detail'),
 
-    # Додавання нового оголошення
+  
     path('add/', mp_views.add_missing_person, name='add_missing'),
 
     path('login/', views_auth.login_view, name='login'),

@@ -1,0 +1,142 @@
+{% extends 'base.html' %}
+{% block content %}
+
+ 
+<div class="container mt-5 mb-5">
+  <div class="row justify-content-center">
+    <div class="col-lg-6">
+      <div class="card p-4 shadow-sm rounded-4 border-0 profile-card">
+        <h3 class="text-center mb-4 fw-bold text-primary">👤 Мій профіль</h3>
+
+        <form method="post" enctype="multipart/form-data">
+          {% csrf_token %}
+
+          <div class="text-center mb-3">
+            {% if profile.photo %}
+              <img src="{{ profile.photo.url }}" class="rounded-circle shadow-sm" width="120" height="120" alt="Фото профілю">
+            {% else %}
+              <img src="/static/img/default-avatar.png" class="rounded-circle shadow-sm" width="120" height="120" alt="Без фото">
+            {% endif %}
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Ім’я користувача</label>
+            <input type="text" name="username" class="form-control rounded-3" value="{{ user.username }}">
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Електронна пошта</label>
+            <input type="email" name="email" class="form-control rounded-3" value="{{ user.email }}">
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Новий пароль</label>
+            <div class="input-group">
+              <input type="password" name="password" id="password" class="form-control rounded-start-3" placeholder="••••••••">
+              <button type="button" class="btn btn-outline-secondary" id="togglePassword"><i class="bi bi-eye"></i></button>
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Телефон</label>
+            <input type="text" name="phone" class="form-control rounded-3" value="{{ profile.phone }}">
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Про себе</label>
+            <textarea name="bio" class="form-control rounded-3" rows="3">{{ profile.bio }}</textarea>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Фото профілю</label>
+            <input type="file" name="photo" class="form-control rounded-3">
+          </div>
+
+          <button type="submit" class="btn btn-primary w-100 mt-3">💾 Зберегти зміни</button>
+        </form>
+
+        <hr class="my-4">
+        <div class="text-center text-muted">
+          <p>📄 Оголошень створено: <strong>{{ total_posts }}</strong></p>
+          <p>💬 Отримано повідомлень: <strong>{{ total_messages }}</strong></p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 👁️ JS для пароля -->
+<script>
+  document.getElementById('togglePassword').addEventListener('click', function() {
+    const input = document.getElementById('password');
+    const icon = this.querySelector('i');
+    if (input.type === 'password') {
+      input.type = 'text';
+      icon.classList.replace('bi-eye', 'bi-eye-slash');
+    } else {
+      input.type = 'password';
+      icon.classList.replace('bi-eye-slash', 'bi-eye');
+    }
+  });
+</script>
+
+<!-- 🎨 Тема через CSS-змінні -->
+<style>
+  /* 🎨 Базові кольори (світла тема) */
+  :root {
+    --bg-color: #ffffff;
+    --label-text-color: #212529;     
+  --input-text-color: #212529;
+    --input-bg: #f8f9fa;
+    --input-border: rgba(180,180,180,0.4);
+    --card-bg: #ffffff;
+  }
+
+  /* 🌙 Темна тема */
+  [data-theme='dark'] {
+    --bg-color: #050920;
+     --label-text-color: #ffffff;
+  --input-text-color: #030303;
+    --input-bg: #989898;
+    --input-border: #444;
+    --card-bg: #202845;
+  }
+
+  /* 📋 Використання змінних */
+  body {
+    background-color: var(--bg-color);
+    color: var(--label-text-color);
+    transition: background-color 0.3s ease, color 0.3s ease;
+  }
+
+  .profile-card {
+    background-color: var(--card-bg);
+    transition: background-color 0.3s ease, color 0.3s ease;
+  }
+
+  label.form-label {
+    color: var(--label-text-color);
+  }
+
+  input, textarea {
+    background-color: var(--input-bg);
+    color: var(--input-text-color);
+    border: 1px solid var(--input-border);
+    transition: all 0.3s ease;
+  }
+
+  input:focus, textarea:focus {
+    border-color: #007bff;
+    box-shadow: 0 0 6px rgba(0,123,255,0.3);
+  }
+
+  .btn-primary {
+    background: linear-gradient(135deg, #0d6efd, #007bff);
+    border: none;
+  }
+
+  .btn-primary:hover {
+    background: linear-gradient(135deg, #0056d2, #0041a3);
+  }
+</style>
+{% endblock %}

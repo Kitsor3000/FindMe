@@ -168,25 +168,47 @@
       <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navMenu">
         <span class="navbar-toggler-icon"></span>
       </button>
-      <div class="collapse navbar-collapse justify-content-end" id="navMenu">
-        <ul class="navbar-nav align-items-center gap-2">
-          <li class="nav-item"><a href="/" class="nav-link">Головна</a></li>
-          <li class="nav-item"><a href="/chat/" class="nav-link">Чат</a></li>
-          <li class="nav-item"><a href="/about/" class="nav-link">Про нас</a></li>
-          <li class="nav-item"><a href="/contacts/" class="nav-link">Контакти</a></li>
+     <div class="collapse navbar-collapse justify-content-end" id="navMenu">
+  <ul class="navbar-nav align-items-center gap-2">
+    <li class="nav-item"><a href="/" class="nav-link">Головна</a></li>
+    <li class="nav-item"><a href="/chat/" class="nav-link">Чат</a></li>
+    <li class="nav-item"><a href="/about/" class="nav-link">Про нас</a></li>
+    <li class="nav-item"><a href="/contacts/" class="nav-link">Контакти</a></li>
 
-          {% if user.is_authenticated %}
-            <li class="nav-item"><a href="/my-posts/" class="nav-link">Мої оголошення</a></li>
-            <li class="nav-item"><a href="/add/" class="btn btn-primary btn-sm me-2"><i class="bi bi-plus-circle"></i> Додати</a></li>
-            <li class="nav-item"><a href="/logout/" class="btn btn-outline-danger btn-sm">Вийти</a></li>
-          {% else %}
-            <li class="nav-item"><a href="/login/" class="btn btn-outline-primary btn-sm">Увійти</a></li>
-          {% endif %}
-          <li class="nav-item">
-            <button id="themeToggle" class="theme-toggle" title="Змінити тему">🌙</button>
-          </li>
+    {% if user.is_authenticated %}
+    
+
+      <!-- 👤 Мій профіль -->
+      <li class="nav-item dropdown">
+        <a class="btn btn-outline-primary btn-sm dropdown-toggle d-flex align-items-center"
+           href="#" id="profileDropdown" role="button"
+           data-bs-toggle="dropdown" aria-expanded="false">
+          <i class="bi bi-person-circle me-1"></i> {{ user.username }}
+        </a>
+        <ul class="dropdown-menu dropdown-menu-end shadow-sm" aria-labelledby="profileDropdown">
+          <li><a class="dropdown-item" href="/profile/"><i class="bi bi-person"></i> Мій профіль</a></li>
+          <li><a class="dropdown-item" href="/my-posts/"><i class="bi bi-file-earmark-text"></i> Мої оголошення</a></li>
+          <li><hr class="dropdown-divider"></li>
+          <li><a class="dropdown-item text-danger" href="/logout/"><i class="bi bi-box-arrow-right"></i> Вийти</a></li>
         </ul>
-      </div>
+      </li>
+
+      <!-- ➕ Додати оголошення -->
+      <li class="nav-item">
+        <a href="/add/" class="btn btn-primary btn-sm me-2">
+          <i class="bi bi-plus-circle"></i> Додати
+        </a>
+      </li>
+    {% else %}
+      <li class="nav-item"><a href="/login/" class="btn btn-outline-primary btn-sm">Увійти</a></li>
+    {% endif %}
+
+    <li class="nav-item">
+      <button id="themeToggle" class="theme-toggle" title="Змінити тему">🌙</button>
+    </li>
+  </ul>
+</div>
+
     </div>
   </nav>
 

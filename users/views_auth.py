@@ -2,9 +2,10 @@ from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.models import User
 from .forms import LoginForm
+from users.models import UserProfile
 
 def login_view(request):
-    error_message = None  # текст помилки для шаблону
+    error_message = None  
 
     if request.method == "POST":
         form = LoginForm(request.POST)
@@ -12,7 +13,7 @@ def login_view(request):
             username_or_email = form.cleaned_data["username_or_email"].strip()
             password = form.cleaned_data["password"]
 
-            # 🔍 Знайти користувача за email або username
+            # Знаходимо користувача по username або email
             user_obj = None
             if User.objects.filter(username=username_or_email).exists():
                 user_obj = User.objects.get(username=username_or_email)
@@ -20,9 +21,13 @@ def login_view(request):
                 user_obj = User.objects.get(email=username_or_email)
 
             if user_obj:
-                # 🧠 Авторизуємося тільки через username (не через email)
+                # Перевіряємо пароль
                 user = authenticate(request, username=user_obj.username, password=password)
                 if user is not None:
+                    # ✅ Якщо профілю ще немає — створюємо його
+                    if not hasattr(user, "profile"):
+                        UserProfile.objects.create(user=user)
+
                     login(request, user)
                     return redirect("home")
                 else:
