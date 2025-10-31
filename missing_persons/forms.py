@@ -12,12 +12,20 @@ class MissingPersonForm(forms.ModelForm):
             'city',
             'description',
             'photo',
+            'category',
+            'status',
             'location',
             'latitude',
             'longitude',
         ]
 
         widgets = {
+            'category': forms.Select(attrs={
+                'class': 'form-select rounded-3'
+            }),
+            'status': forms.Select(attrs={
+                'class': 'form-select rounded-3'
+            }),
             'full_name': forms.TextInput(attrs={
                 'class': 'form-control rounded-3',
                 'placeholder': "Наприклад: Іваненко Іван Іванович"

@@ -3,10 +3,19 @@ from django.contrib.auth.models import User
 
 class MissingPerson(models.Model):
     STATUS_CHOICES = [
-        ('active', 'Активне'),
+       ('missing', 'У розшуку'),
         ('found', 'Знайдено'),
-        ('archived', 'Архівовано'),
     ]
+
+    CATEGORY_CHOICES = [
+    ('child', 'Дитина'),
+    ('adult', 'Дорослий'),
+    ('elderly', 'Літня людина'),
+    ('military', 'Військовий'),
+    ('disabled', 'Людина з інвалідністю'),
+    ('other', 'Інше'),
+]
+
 
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     full_name = models.CharField(max_length=150)
@@ -16,7 +25,9 @@ class MissingPerson(models.Model):
     city = models.CharField(max_length=100)
     description = models.TextField()
     photo = models.ImageField(upload_to='missing_persons/', blank=True, null=True)
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='active')
+    category = models.CharField(max_length=50, choices=CATEGORY_CHOICES, default='other')
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='missing')
+
     created_at = models.DateTimeField(auto_now_add=True)
     location = models.CharField("Останнє місце, де бачили", max_length=255, blank=True, null=True)
     latitude = models.FloatField(blank=True, null=True)
