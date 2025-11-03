@@ -74,6 +74,29 @@ document.addEventListener('DOMContentLoaded', function() {
 </script>
 {% endif %}
 
+<!-- 💬 Контакти автора -->
+<div class="card p-4 shadow-sm border-0 rounded-4 mt-4 mb-5">
+  <h4 class="fw-semibold mb-3">📞 Контакт із автором</h4>
+  <p><strong>Автор:</strong> {{ person.user.username }}</p>
+  <p><strong>Номер телефону:</strong>
+     {{ person.user.profile.phone|default:"Не вказано" }}
+  </p>
+
+  {% if user.is_authenticated %}
+    {% if user != person.user %}
+      <a href="{% url 'chat_detail' person.user.username %}"
+         class="btn btn-outline-primary rounded-3 fw-semibold shadow-sm w-100">
+        💬 Написати автору
+      </a>
+    {% else %}
+      <p class="text-muted">Це ваше оголошення.</p>
+    {% endif %}
+  {% else %}
+    <p><a href="{% url 'login' %}">Увійдіть</a>, щоб написати автору.</p>
+  {% endif %}
+</div>
+
+
 <!-- 💬 Коментарі -->
 <div class="card p-4 shadow-sm border-0 rounded-4 mt-4 mb-5">
   <h4 class="fw-semibold mb-3">💬 Коментарі</h4>

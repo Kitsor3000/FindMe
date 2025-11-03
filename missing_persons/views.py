@@ -227,3 +227,4 @@ def map_view(request):
         "persons": persons_data,
         "selected_category": category,
     })
+
