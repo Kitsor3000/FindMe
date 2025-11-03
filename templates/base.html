@@ -175,6 +175,10 @@
     <li class="nav-item"><a href="/about/" class="nav-link">Про нас</a></li>
     <li class="nav-item"><a href="/contacts/" class="nav-link">Контакти</a></li>
 
+    {% if user.is_staff or user.is_superuser %}
+        <li class="nav-item"><a href="/statistics/" class="nav-link">📊 Статистика</a></li>
+      {% endif %}
+
     {% if user.is_authenticated %}
     
 

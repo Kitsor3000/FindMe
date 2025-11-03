@@ -1,0 +1,167 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container py-5">
+
+  <!-- 🔹 Заголовок -->
+  <div class="text-center mb-5">
+    <h1 class="fw-bold display-5 text-primary mb-2">📊 Панель адміністратора</h1>
+    <p class="lead text-muted">Аналітика зниклих осіб, регіонів і активності користувачів</p>
+  </div>
+
+  
+
+  <!-- 📈 Графіки -->
+  <div class="row g-4">
+    <div class="col-lg-6">
+      <div class="chart-card p-4 rounded-4 shadow-sm">
+        <h5 class="fw-semibold mb-3">📊 Розподіл за статусом</h5>
+        <canvas id="statusChart" height="200"></canvas>
+      </div>
+    </div>
+
+    <div class="col-lg-6">
+      <div class="chart-card p-4 rounded-4 shadow-sm">
+        <h5 class="fw-semibold mb-3">🗺️ Регіони з найбільшою кількістю оголошень</h5>
+        <canvas id="regionChart" height="300"></canvas>
+      </div>
+    </div>
+
+    <div class="col-lg-12">
+      <div class="chart-card p-4 rounded-4 shadow-sm mt-4">
+        <h5 class="fw-semibold mb-3">📆 Нові оголошення за останні 7 днів</h5>
+        <canvas id="weeklyChart" height="90"></canvas>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ⚙️ Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+  // 📦 Дані із Django
+  const statusData = JSON.parse('{{ status_data|escapejs }}');
+  const regionData = JSON.parse('{{ region_data|escapejs }}');
+  const weeklyData = JSON.parse('{{ weekly_data|escapejs }}');
+
+  // 🎨 Основні кольори (редагуй тут)
+  const COLORS = {
+    missing: '#FF1493',   // червоний
+    found: '#00FF7F	',     // зелений
+    other: '#48D1CC',     // синій
+    bg: '#ffffff',        // фон графіків
+    text: '#222222',      // колір тексту (для світлої теми)
+    textDark: '#f1f1f1',   // колір тексту (для темної теми)
+     others: '#6A5ACD'
+  };
+
+  // 🧩 Графік за статусом
+  new Chart(document.getElementById('statusChart'), {
+    type: 'doughnut',
+    data: {
+      labels: Object.keys(statusData),
+      datasets: [{
+        data: Object.values(statusData),
+        backgroundColor: [COLORS.missing, COLORS.found, COLORS.other],
+        borderWidth: 0
+      }]
+    },
+    options: {
+      plugins: {
+        legend: {
+          position: 'bottom',
+          labels: { color: COLORS.text }
+        }
+      }
+    }
+  });
+
+  // 📍 Графік за регіонами
+  new Chart(document.getElementById('regionChart'), {
+    type: 'bar',
+    data: {
+      labels: Object.keys(regionData),
+      datasets: [{
+        label: 'Кількість осіб',
+        data: Object.values(regionData),
+        backgroundColor: COLORS.other,
+        borderRadius: 10
+      }]
+    },
+    options: {
+      scales: {
+        x: { ticks: { color: COLORS.text } },
+        y: { beginAtZero: true, ticks: { color: COLORS.text } }
+      },
+      plugins: { legend: { display: false } }
+    }
+  });
+
+  // 🗓️ Графік нових за тиждень (компактний)
+  new Chart(document.getElementById('weeklyChart'), {
+    type: 'line',
+    data: {
+      labels: Object.keys(weeklyData),
+      datasets: [{
+        label: 'Нові оголошення',
+        data: Object.values(weeklyData),
+        fill: true,
+        borderColor: COLORS.others,
+        backgroundColor: 'rgba(72, 61, 139,0.15)',
+        tension: 0.35,
+        pointRadius: 4
+      }]
+    },
+    options: {
+      plugins: { legend: { display: false } },
+      scales: {
+        x: { ticks: { color: COLORS.text } },
+        y: { beginAtZero: true, ticks: { color: COLORS.text } }
+      }
+    }
+  });
+</script>
+
+<!-- 🎨 Стилі -->
+<style>
+  :root {
+    --missing-color: #ff6b6b;
+    --found-color: #38d39f;
+    --other-color: #4dabf7;
+  }
+
+  .metric-card {
+    color: #fff;
+    text-align: center;
+    padding: 20px;
+    border-radius: 16px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  }
+
+  .metric-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 16px rgba(0,0,0,0.15);
+  }
+
+  .metric-card.missing { background: var(--missing-color); }
+  .metric-card.found { background: var(--found-color); }
+  .metric-card.other { background: var(--other-color); }
+
+  .chart-card {
+    background-color: var(--bs-body-bg);
+    color: var(--bs-body-color);
+    border: none;
+    transition: all 0.3s ease;
+  }
+
+  /* 🌙 Темна тема */
+  body[data-theme='dark'] .chart-card {
+    background-color: #1f1f1f;
+    color: #f1f1f1;
+  }
+
+  footer { margin-top: 80px !important; }
+</style>
+
+{% endblock %}

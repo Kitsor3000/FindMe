@@ -6,7 +6,10 @@ from django.contrib import messages
 from comments.models import Comment
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render
-
+from django.db.models import Count
+from django.contrib.admin.views.decorators import staff_member_required
+from django.utils.timezone import now, timedelta
+import json
 
 
 class MissingPersonViewSet(viewsets.ModelViewSet):
@@ -130,3 +133,50 @@ def delete_missing_person(request, pk):
     else:
         messages.error(request, "Ви не можете видалити це оголошення.")
     return redirect('home')
+
+
+@staff_member_required
+def admin_dashboard(request):
+    from .models import MissingPerson
+
+    # 🔹 Підрахунок за статусом
+    status_data = dict(
+        MissingPerson.objects.values_list('status')
+        .annotate(total=Count('status'))
+    )
+
+    # 🔹 Підрахунок за регіонами (топ 7)
+    region_data_qs = (
+        MissingPerson.objects.values('region')
+        .annotate(total=Count('region'))
+        .order_by('-total')[:7]
+    )
+    region_data = {r['region']: r['total'] for r in region_data_qs}
+
+    # 🔹 Нові за останній тиждень
+    today = now().date()
+    last_week = today - timedelta(days=6)
+    daily_counts = (
+        MissingPerson.objects.filter(created_at__date__gte=last_week)
+        .extra({'day': "date(created_at)"})
+        .values('day')
+        .annotate(total=Count('id'))
+        .order_by('day')
+    )
+
+    # 🧠 Якщо 'day' — це рядок, просто залишаємо як є
+    weekly_data = {}
+    for d in daily_counts:
+        day = d['day']
+        if hasattr(day, 'strftime'):
+            formatted_day = day.strftime('%d.%m')
+        else:
+            formatted_day = str(day)
+        weekly_data[formatted_day] = d['total']
+
+    # ✅ Повернення відповіді
+    return render(request, 'admin_dashboard.html', {
+        'status_data': json.dumps(status_data, ensure_ascii=False),
+        'region_data': json.dumps(region_data, ensure_ascii=False),
+        'weekly_data': json.dumps(weekly_data, ensure_ascii=False),
+    })

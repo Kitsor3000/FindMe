@@ -14,17 +14,46 @@
           {{ form.full_name }}
         </div>
 
-        <!-- Регіон -->
-        <div class="form-group mb-3">
-          <label class="form-label fw-semibold">Регіон</label>
-          {{ form.region }}
-        </div>
+        <!-- Область -->
+       <div class="form-group mb-3 position-relative">
+  <label class="form-label fw-semibold">Область</label>
+  <select id="regionSelect" name="region" class="form-select rounded-3">
+    <option value="" disabled selected>Оберіть область...</option>
+    <option>Вінницька область</option>
+    <option>Волинська область</option>
+    <option>Дніпропетровська область</option>
+    <option>Донецька область</option>
+    <option>Житомирська область</option>
+    <option>Закарпатська область</option>
+    <option>Запорізька область</option>
+    <option>Івано-Франківська область</option>
+    <option>Київська область</option>
+    <option>Кіровоградська область</option>
+    <option>Луганська область</option>
+    <option>Львівська область</option>
+    <option>Миколаївська область</option>
+    <option>Одеська область</option>
+    <option>Полтавська область</option>
+    <option>Рівненська область</option>
+    <option>Сумська область</option>
+    <option>Тернопільська область</option>
+    <option>Харківська область</option>
+    <option>Херсонська область</option>
+    <option>Хмельницька область</option>
+    <option>Черкаська область</option>
+    <option>Чернівецька область</option>
+    <option>Чернігівська область</option>
+    <option>м. Київ</option>
+  </select>
+</div>
+
 
         <!-- Місто -->
-        <div class="form-group mb-3">
-          <label class="form-label fw-semibold">Місто</label>
-          {{ form.city }}
-        </div>
+      <div class="form-group mb-3 position-relative">
+  <label class="form-label fw-semibold">Місто</label>
+  <input type="text" id="cityInput" name="city" class="form-control rounded-3" placeholder="Введіть або виберіть місто..." autocomplete="off">
+  <div id="cityDropdown" class="dropdown-menu w-100 shadow-sm" style="max-height: 180px; overflow-y: auto;"></div>
+</div>
 
         <!-- Дата зникнення -->
         <div class="form-group mb-3">
@@ -96,7 +125,72 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('id_latitude').value = lat;
     document.getElementById('id_longitude').value = lng;
   });
+
+  
+  // 🔹 Повний список великих міст України (обласні центри + інші)
+  const citiesByRegion = {
+    "Хмельницька область": ["Хмельницький", "Кам’янець-Подільський", "Шепетівка", "Старокостянтинів", "Нетішин"],
+    "Київська область": ["Біла Церква", "Бориспіль", "Бровари", "Ірпінь", "Фастів", "Вишгород"],
+    "Львівська область": ["Львів", "Дрогобич", "Червоноград", "Стрий", "Самбір", "Трускавець", "Борислав"],
+    "Одеська область": ["Одеса", "Чорноморськ", "Білгород-Дністровський", "Ізмаїл", "Подільськ", "Южне"],
+    "Харківська область": ["Харків", "Ізюм", "Куп'янськ", "Лозова", "Мерефа"],
+    "Дніпропетровська область": ["Дніпро", "Кривий Ріг", "Кам’янське", "Павлоград", "Нікополь"],
+    "Черкаська область": ["Черкаси", "Умань", "Сміла", "Золотоноша"],
+    "Чернівецька область": ["Чернівці", "Новоселиця", "Хотин"],
+    "Полтавська область": ["Полтава", "Кременчук", "Миргород", "Лубни"],
+    "Вінницька область": ["Вінниця", "Жмеринка", "Могилів-Подільський"],
+    "Рівненська область": ["Рівне", "Дубно", "Вараш", "Острог"],
+    "Івано-Франківська область": ["Івано-Франківськ", "Коломия", "Калуш", "Яремче"],
+    "Закарпатська область": ["Ужгород", "Мукачево", "Хуст", "Берегове"],
+    "Тернопільська область": ["Тернопіль", "Чортків", "Кременець"],
+    "Житомирська область": ["Житомир", "Бердичів", "Коростень", "Новоград-Волинський"],
+    "Запорізька область": ["Запоріжжя", "Мелітополь", "Бердянськ", "Енергодар"],
+    "Миколаївська область": ["Миколаїв", "Вознесенськ", "Первомайськ"],
+    "Сумська область": ["Суми", "Конотоп", "Шостка", "Охтирка"],
+    "Херсонська область": ["Херсон", "Нова Каховка", "Скадовськ"],
+    "Чернігівська область": ["Чернігів", "Ніжин", "Прилуки"],
+    "м. Київ": ["Київ"],
+  };
+
+  // 🔁 Оновлення списку при виборі області
+  regionSelect.addEventListener("change", () => {
+    cityInput.value = "";
+    cityDropdown.innerHTML = "";
+  });
+
+  // 🧠 Автопошук у полі міста
+  cityInput.addEventListener("input", () => {
+    const region = regionSelect.value;
+    const query = cityInput.value.toLowerCase();
+    const cities = citiesByRegion[region] || [];
+
+    cityDropdown.innerHTML = "";
+    if (query.length > 0 && cities.length > 0) {
+      const matches = cities.filter(c => c.toLowerCase().includes(query));
+      matches.forEach(city => {
+        const option = document.createElement("div");
+        option.className = "dropdown-item";
+        option.textContent = city;
+        option.addEventListener("click", () => {
+          cityInput.value = city;
+          cityDropdown.classList.remove("show");
+        });
+        cityDropdown.appendChild(option);
+      });
+      if (matches.length > 0) {
+        cityDropdown.classList.add("show");
+      } else {
+        cityDropdown.classList.remove("show");
+      }
+    } else {
+      cityDropdown.classList.remove("show");
+    }
+  });
 });
+
+
+
+
 </script>
 
 <style>
@@ -165,6 +259,42 @@ document.addEventListener('DOMContentLoaded', function() {
   footer {
     margin-top: 30px !important;
   }
+
+
+  .dropdown-menu {
+  display: none;
+  position: absolute;
+  top: 100%;
+  left: 0;
+  z-index: 1000;
+  background-color: var(--input-bg);
+  border: 1px solid var(--input-border);
+  border-radius: 0.5rem;
+  padding: 0.3rem 0;
+  width: 100%;
+  transition: all 0.15s ease;
+}
+
+.dropdown-menu.show {
+  display: block;
+  animation: fadeIn 0.15s ease-in;
+}
+
+.dropdown-item {
+  padding: 8px 14px;
+  cursor: pointer;
+  color: var(--input-text-color);
+}
+
+.dropdown-item:hover {
+  background-color: #0d6efd;
+  color: #fff;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
 </style>
 
 {% endblock %}
