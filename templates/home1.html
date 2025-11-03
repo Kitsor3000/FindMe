@@ -1,0 +1,161 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+
+<!-- 🌍 Hero Section -->
+<section class="hero d-flex align-items-center text-center text-white fade-in">
+  <div class="container py-5">
+    <h1 class="display-4 fw-bold mb-3">FindMe — разом ми повертаємо людей додому</h1>
+    <p class="lead mb-4 opacity-75">Платформа для об’єднання волонтерів, родичів і небайдужих у пошуку зниклих людей по всій Україні.</p>
+    <div>
+      <a href="{% url 'home' %}" class="btn btn-primary btn-lg px-4 py-2 me-2">🔍 Переглянути оголошення</a>
+      <a href="{% url 'register' %}" class="btn btn-outline-light btn-lg px-4 py-2">🤝 Стати волонтером</a>
+    </div>
+  </div>
+</section>
+
+<!-- 📰 Останні новини -->
+<section class="news py-5 fade-in">
+  <div class="container">
+    <h2 class="fw-bold text-center mb-5">🗞️ Останні новини</h2>
+    <div class="row g-4">
+      {% for n in news %}
+      <div class="col-md-4">
+        <div class="card glass-card border-0 h-100">
+          <img src="{{ n.image }}" class="card-img-top" alt="Новина">
+          <div class="card-body">
+            <h5 class="card-title fw-semibold">{{ n.title }}</h5>
+            <p class="card-text text-muted">{{ n.description }}</p>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<!-- 📈 Статистика -->
+<section class="stats text-center py-5 fade-in">
+  <div class="container">
+    <div class="row justify-content-center g-4">
+      <div class="col-md-4 col-6">
+        <div class="stat-box p-4 rounded-pill shadow-sm">
+          <h2 class="fw-bold text-success">{{ stats.total_missing }}</h2>
+          <p>Зниклих</p>
+        </div>
+      </div>
+      <div class="col-md-4 col-6">
+        <div class="stat-box p-4 rounded-pill shadow-sm">
+          <h2 class="fw-bold text-info">{{ stats.found }}</h2>
+          <p>Знайдено</p>
+        </div>
+      </div>
+      <div class="col-md-4 col-6">
+        <div class="stat-box p-4 rounded-pill shadow-sm">
+          <h2 class="fw-bold text-primary">{{ stats.volunteers }}</h2>
+          <p>Волонтерів</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 🤝 CTA -->
+<section class="cta text-center py-5 fade-in">
+  <div class="container">
+    <h2 class="fw-bold mb-3">Приєднуйтесь до FindMe</h2>
+    <p class="lead mb-4 mx-auto" style="max-width:700px;">Кожен клік, репост чи повідомлення може допомогти знайти людину. Станьте частиною змін уже сьогодні.</p>
+    <a href="{% url 'register' %}" class="btn btn-success btn-lg shadow-sm">💚 Приєднатись зараз</a>
+  </div>
+</section>
+
+<style>
+  /* 🌄 Hero */
+  .hero {
+    background: linear-gradient(rgba(10, 15, 30, 0.55), rgba(10, 15, 30, 0.65)),
+                url("{% static 'images/hero-bg.jpg' %}") center/cover no-repeat;
+    min-height: 85vh;
+    border-radius: 20px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+    color: #fff !important;
+  }
+
+  html[data-theme="dark"] .hero {
+    filter: brightness(1.15); /* фото стає трохи яскравішим */
+    color: #fff !important; /* текст залишається білим */
+  }
+
+  /* 🗞️ Новини */
+  .glass-card {
+    backdrop-filter: blur(16px);
+    background-color: rgba(255,255,255,0.7);
+    border-radius: 16px;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  }
+
+  html[data-theme="dark"] .glass-card {
+    background-color: rgba(30, 30, 40, 0.7);
+  }
+
+  .glass-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+  }
+
+  .glass-card img {
+    border-top-left-radius: 16px;
+    border-top-right-radius: 16px;
+    height: 200px;
+    object-fit: cover;
+  }
+
+  /* 📊 Статистика */
+  .stats {
+    border-radius: 24px;
+    background: linear-gradient(120deg, #1651d0, #03d697);
+    color: #fff;
+  }
+
+  .stat-box {
+    background: rgba(255,255,255,0.1);
+    backdrop-filter: blur(10px);
+    color: #fff;
+    border: 1px solid rgba(255,255,255,0.15);
+    transition: 0.3s;
+  }
+
+  .stat-box:hover {
+    transform: translateY(-4px);
+    background: rgba(255,255,255,0.2);
+  }
+
+  /* 🤝 CTA */
+  .cta {
+    background: linear-gradient(120deg, #e9f2ff, #f8fff8);
+    border-radius: 20px;
+  }
+
+  html[data-theme="dark"] .cta {
+    background: linear-gradient(120deg, #101828, #1e1e2e);
+  }
+
+  /* ✨ Анімації */
+  .fade-in {
+    opacity: 0;
+    transform: translateY(20px);
+    animation: fadeInUp 0.7s ease forwards;
+  }
+  .hero h1,
+.hero p {
+  color: #ffffff !important;
+  text-shadow: 0 2px 6px rgba(0,0,0,0.4); /* легка тінь для контрасту */
+}
+
+  @keyframes fadeInUp {
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+</style>
+{% endblock %}

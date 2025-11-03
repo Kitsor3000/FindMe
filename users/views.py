@@ -27,7 +27,7 @@ def register_view(request):
 
 @login_required
 def profile_view(request):
-    profile = request.user.profile  # завдяки related_name у моделі
+    profile = request.user.profile  
     user = request.user
 
     if request.method == 'POST':
@@ -45,7 +45,7 @@ def profile_view(request):
         if bio:
             profile.bio = bio
 
-        # якщо вибране нове фото
+        
         if 'photo' in request.FILES:
             profile.photo = request.FILES['photo']
 

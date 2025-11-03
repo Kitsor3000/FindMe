@@ -24,8 +24,8 @@ urlpatterns = [
     path('admin/', admin.site.urls),
 
     
-    path('', mp_views.home_page, name='home'),
-
+    path('', mp_views.home_view, name='home1'),
+    path('home', mp_views.home_page, name='home'),
    
     path('person/<int:pk>/', mp_views.missing_detail, name='missing_detail'),
 

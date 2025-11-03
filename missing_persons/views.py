@@ -10,6 +10,7 @@ from django.db.models import Count
 from django.contrib.admin.views.decorators import staff_member_required
 from django.utils.timezone import now, timedelta
 import json
+from datetime import date
 
 
 class MissingPersonViewSet(viewsets.ModelViewSet):
@@ -228,3 +229,38 @@ def map_view(request):
         "selected_category": category,
     })
 
+
+
+def home_view(request):
+    news = [
+        {
+            "title": "Волонтери об’єдналися для пошуку у Харкові",
+            "description": "Більше 40 людей долучились до пошуку у регіоні.",
+            "image": "/static/images/news1.jpg",
+        },
+        {
+            "title": "Знайдено 12 людей за минулий тиждень",
+            "description": "Завдяки активності користувачів і поліції вдалося відшукати 12 осіб.",
+            "image": "/static/images/news2.jpg",
+        },
+        {
+            "title": "Пошукова операція на Донеччині: знайдено двох військових",
+            "description": "Волонтери та поліція об’єднали зусилля для пошуку зниклих військових. Обидва чоловіки знайдені живими та передані лікарям.",
+            "image": "/static/images/news3.jpg",
+        },
+    ]
+
+    stats = {
+        "total_missing": MissingPerson.objects.count(),
+        "found": MissingPerson.objects.filter(status="found").count(),
+        "volunteers": 134,
+        "active_users": 89,
+    }
+
+    context = {
+        "news": news,
+        "stats": stats,
+        "year": date.today().year
+    }
+
+    return render(request, "home1.html", context)
