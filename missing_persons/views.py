@@ -174,9 +174,56 @@ def admin_dashboard(request):
             formatted_day = str(day)
         weekly_data[formatted_day] = d['total']
 
-    # ✅ Повернення відповіді
+    
     return render(request, 'admin_dashboard.html', {
         'status_data': json.dumps(status_data, ensure_ascii=False),
         'region_data': json.dumps(region_data, ensure_ascii=False),
         'weekly_data': json.dumps(weekly_data, ensure_ascii=False),
+    })
+
+
+
+
+def map_view(request):
+    category = request.GET.get('category', 'all')
+
+    # 🔹 Мапа відповідності між українськими назвами та кодами з моделі
+    category_map = {
+        "Дитина": "child",
+        "Дорослий": "adult",
+        "Літня людина": "elderly",
+        "Військовий": "military",
+        "Людина з інвалідністю": "disabled",
+        "Інше": "other",
+    }
+
+    # 🔹 Фільтрація за категорією
+    if category == 'all':
+        persons = MissingPerson.objects.all()
+    else:
+        db_value = category_map.get(category)
+        if db_value:
+            persons = MissingPerson.objects.filter(category=db_value)
+        else:
+            persons = MissingPerson.objects.none()
+
+    # 🔹 Формування списку даних для карти
+    persons_data = []
+    for p in persons:
+        if p.latitude and p.longitude:
+            persons_data.append({
+                "id": p.id,
+                "full_name": p.full_name,
+                "city": p.city,
+                "region": p.region,
+                "latitude": p.latitude,
+                "longitude": p.longitude,
+                "category": dict(MissingPerson.CATEGORY_CHOICES).get(p.category, p.category),  # показує українську
+                "status": p.status,
+                "photo": p.photo.url if p.photo else None,
+            })
+
+    return render(request, "map.html", {
+        "persons": persons_data,
+        "selected_category": category,
     })

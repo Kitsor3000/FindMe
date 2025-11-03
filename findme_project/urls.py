@@ -55,6 +55,10 @@ path('person/<int:pk>/delete/', mp_views.delete_missing_person, name='delete_mis
       path('chat/', include('user_messages.urls')),
 
       path('statistics/', mp_views.admin_dashboard, name='admin_dashboard'),
+    path("map/", mp_views.map_view, name="map"),
+
+
+
 ]
 
 from django.conf import settings

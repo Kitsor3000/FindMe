@@ -1,0 +1,162 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container-fluid mt-4 mb-5 position-relative">
+  <h2 class="text-center fw-bold mb-4 text-primary">🗺️ Мапа зниклих людей</h2>
+
+  <!-- 🔹 Панель фільтрів (замість select, але з Django GET логікою) -->
+  <div class="filters text-center mb-3">
+    <button class="btn btn-outline-primary m-1" data-category="all">🌍 Усі</button>
+    <button class="btn btn-outline-warning m-1" data-category="Дитина">👶 Діти</button>
+    <button class="btn btn-outline-success m-1" data-category="Дорослий">🧍‍♂️ Дорослі</button>
+    <button class="btn btn-outline-info m-1" data-category="Військовий">🎖️ Військові</button>
+    <button class="btn btn-outline-secondary m-1" data-category="Літня людина">👴 Літні</button>
+    <button class="btn btn-outline-light border m-1" data-category="Людина з інвалідністю">♿ Інвалідність</button>
+  </div>
+
+  <!-- 🗺️ Мапа -->
+  <div id="map" style="height: 75vh; border-radius: 12px; overflow:hidden;"></div>
+
+  <!-- 🗒️ Легенда -->
+  <div id="legend" class="card shadow p-2 position-absolute bottom-0 end-0 m-3"
+       style="z-index:1000; font-size:0.9em; color:#000;">
+    <strong style="color:#000;">🔎 Статус:</strong><br>
+    <span style="color:#f39c12;">● У розшуку</span><br>
+    <span style="color:#2ecc71;">● Знайдено</span><br>
+    <span style="color:#e74c3c;">● Інше</span>
+  </div>
+</div>
+
+<!-- ✅ Leaflet і MarkerCluster -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
+<script src="https://unpkg.com/leaflet.markercluster/dist/leaflet.markercluster.js"></script>
+<link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster/dist/MarkerCluster.css" />
+<link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster/dist/MarkerCluster.Default.css" />
+
+<!-- ✅ Безпечна передача даних -->
+{{ persons|json_script:"persons_data" }}
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  const personsData = JSON.parse(document.getElementById("persons_data").textContent);
+
+  // 🗺️ Карта
+  const map = L.map("map").setView([49.0, 32.0], 6);
+  L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+    attribution: '&copy; OpenStreetMap contributors'
+  }).addTo(map);
+
+  // 🧩 Кластер група
+  const markers = L.markerClusterGroup();
+
+  // 🪶 Додаємо мітки
+  personsData.forEach(p => {
+    if (p.latitude && p.longitude) {
+      const color =
+        p.status === "found"
+          ? "#2ecc71"
+          : p.status === "missing"
+          ? "#f39c12"
+          : "#e74c3c";
+
+      const marker = L.circleMarker([p.latitude, p.longitude], {
+        color,
+        fillColor: color,
+        radius: 8,
+        fillOpacity: 0.9,
+        weight: 1
+      }).bindPopup(`
+        <div style="min-width:200px; text-align:center;">
+          ${p.photo ? `<img src="${p.photo}" alt="${p.full_name}" style="width:100%; max-height:120px; object-fit:cover; border-radius:8px; margin-bottom:6px;">` : ''}
+          <h6 class="fw-semibold mb-1" style="color:#000;">${p.full_name}</h6>
+          <p class="mb-1 text-muted" style="font-size: 0.9em;">
+            <i class="bi bi-geo-alt"></i> ${p.city}, ${p.region}
+          </p>
+          <p class="mb-2"><span class="badge bg-primary">${p.category}</span></p>
+          <a href="/person/${p.id}/" class="btn btn-sm btn-outline-primary w-100">Детальніше</a>
+        </div>
+      `);
+
+      markers.addLayer(marker);
+    }
+  });
+
+  map.addLayer(markers);
+
+  // 🧭 Логіка фільтрації через Django GET параметр
+  const currentCategory = new URLSearchParams(window.location.search).get("category") || "all";
+
+  document.querySelectorAll(".filters button").forEach(btn => {
+    const btnCategory = btn.dataset.category;
+
+    // підсвічуємо активну кнопку
+    if (btnCategory === currentCategory) {
+      btn.classList.remove("btn-outline-*");
+      btn.classList.add("btn-primary", "text-white");
+    }
+
+    // клік по кнопці — робимо перехід із GET параметром
+    btn.addEventListener("click", () => {
+      const params = new URLSearchParams(window.location.search);
+      params.set("category", btnCategory);
+      window.location.search = params.toString();
+    });
+  });
+});
+</script>
+
+<style>
+  /* 🌗 Темна тема — інверсія карти */
+  body[data-theme="dark"] #map {
+    filter: invert(0.9) hue-rotate(180deg) brightness(0.9);
+    transition: filter 0.6s ease;
+  }
+
+  /* 🎨 Кнопки */
+  .filters button {
+    border-radius: 8px;
+    min-width: 110px;
+    font-weight: 500;
+    transition: all 0.2s ease-in-out;
+  }
+  .filters button:hover {
+    transform: translateY(-2px);
+  }
+
+  /* ♿ Кнопка "Інвалідність" — контрастна у темній темі */
+  body[data-theme="dark"] .filters button[data-category="Людина з інвалідністю"] {
+    background-color: #555 !important;
+    color: #fff !important;
+    border-color: #777 !important;
+  }
+
+  /* 🗒️ Попап */
+  .leaflet-popup-content-wrapper,
+  .leaflet-popup-tip {
+    background: #fff !important;
+    color: #000 !important;
+  }
+
+  body[data-theme="dark"] .leaflet-popup-content-wrapper,
+  body[data-theme="dark"] .leaflet-popup-tip {
+    background: #fff !important;
+    color: #000 !important;
+  }
+
+  /* 🌀 Hover-анімація */
+  .leaflet-interactive:hover {
+    cursor: pointer;
+    stroke-width: 2;
+    stroke: #000;
+    r: 10 !important;
+  }
+
+  /* 🧭 Легенда */
+  #legend {
+    backdrop-filter: blur(8px);
+    background-color: rgba(255,255,255,0.9);
+    color: #000 !important;
+  }
+</style>
+{% endblock %}
