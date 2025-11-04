@@ -1,11 +1,18 @@
 {% extends 'base.html' %}
 {% block content %}
 <div class="container py-5">
-
-  <!-- 🔹 Заголовок -->
   <div class="text-center mb-5">
     <h1 class="fw-bold display-5 text-primary mb-2">📊 Панель адміністратора</h1>
     <p class="lead text-muted">Аналітика зниклих осіб, регіонів і активності користувачів</p>
+  </div>
+
+  <!-- 🕒 Фільтр часу -->
+  <div class="text-center mb-4">
+    <div class="btn-group" role="group">
+      <button type="button" class="btn btn-outline-primary active" data-period="week">Тиждень</button>
+      <button type="button" class="btn btn-outline-primary" data-period="month">Місяць</button>
+      <button type="button" class="btn btn-outline-primary" data-period="year">Рік</button>
+    </div>
   </div>
 
   <!-- 📈 Графіки -->
@@ -26,136 +33,141 @@
 
     <div class="col-lg-12">
       <div class="chart-card p-4 rounded-4 shadow-sm mt-4">
-        <h5 class="fw-semibold mb-3 text-dark">📆 Нові оголошення за останні 7 днів</h5>
+        <h5 class="fw-semibold mb-3 text-dark">📆 Нові оголошення</h5>
         <canvas id="weeklyChart" height="90"></canvas>
       </div>
     </div>
   </div>
 </div>
 
-<!-- ⚙️ Chart.js -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <script>
-  // 📦 Дані із Django
-  const statusData = JSON.parse('{{ status_data|escapejs }}');
-  const regionData = JSON.parse('{{ region_data|escapejs }}');
-  const weeklyData = JSON.parse('{{ weekly_data|escapejs }}');
-
-  // 🎨 Основні кольори
   const COLORS = {
     missing: '#FF1493',
     found: '#00FF7F',
     other: '#48D1CC',
-    text: '#000000', // 👈 текст завжди чорний
+    text: '#000000',
     others: '#6A5ACD'
   };
 
-  // 🧩 Графік за статусом
-  new Chart(document.getElementById('statusChart'), {
-    type: 'doughnut',
-    data: {
-      labels: Object.keys(statusData),
-      datasets: [{
-        data: Object.values(statusData),
-        backgroundColor: [COLORS.missing, COLORS.found, COLORS.other],
-        borderWidth: 0
-      }]
-    },
-    options: {
-      plugins: {
-        legend: {
-          position: 'bottom',
-          labels: { color: COLORS.text }
-        }
-      }
-    }
-  });
+  let statusChart, regionChart, weeklyChart;
 
-  // 📍 Графік за регіонами
-  new Chart(document.getElementById('regionChart'), {
-    type: 'bar',
-    data: {
-      labels: Object.keys(regionData),
-      datasets: [{
-        label: 'Кількість осіб',
-        data: Object.values(regionData),
-        backgroundColor: COLORS.other,
-        borderRadius: 10
-      }]
-    },
-    options: {
-      scales: {
-        x: { ticks: { color: COLORS.text } },
-        y: {
-          beginAtZero: true,
-          ticks: {
-            color: COLORS.text,
-            // 👇 показує тільки цілі числа
-            callback: function(value) {
-              return Number.isInteger(value) ? value : '';
-            },
-            stepSize: 1
-          }
-        }
+  // ⚙️ Функція рендеру діаграм
+  function renderCharts(data) {
+    const { status_data, region_data, weekly_data } = data;
+
+    if (statusChart) statusChart.destroy();
+    if (regionChart) regionChart.destroy();
+    if (weeklyChart) weeklyChart.destroy();
+
+    // 🟣 Статуси
+    statusChart = new Chart(document.getElementById('statusChart'), {
+      type: 'doughnut',
+      data: {
+        labels: Object.keys(status_data),
+        datasets: [{
+          data: Object.values(status_data),
+          backgroundColor: [COLORS.missing, COLORS.found, COLORS.other],
+          borderWidth: 0
+        }]
       },
-      plugins: { legend: { display: false } }
-    }
-  });
+      options: { plugins: { legend: { position: 'bottom', labels: { color: COLORS.text } } } }
+    });
 
-  // 🗓️ Графік нових за тиждень
-  new Chart(document.getElementById('weeklyChart'), {
-    type: 'line',
-    data: {
-      labels: Object.keys(weeklyData),
-      datasets: [{
-        label: 'Нові оголошення',
-        data: Object.values(weeklyData),
-        fill: true,
-        borderColor: COLORS.others,
-        backgroundColor: 'rgba(72, 61, 139, 0.15)',
-        tension: 0.35,
-        pointRadius: 4
-      }]
-    },
-    options: {
-      plugins: { legend: { display: false } },
-      scales: {
-        x: { ticks: { color: COLORS.text } },
-        y: {
-          beginAtZero: true,
-          ticks: {
-            color: COLORS.text,
-            // 👇 лише цілі числа
-            callback: function(value) {
-              return Number.isInteger(value) ? value : '';
+    // 🔵 Регіони (з нахиленими назвами)
+    regionChart = new Chart(document.getElementById('regionChart'), {
+      type: 'bar',
+      data: {
+        labels: Object.keys(region_data),
+        datasets: [{
+          data: Object.values(region_data),
+          backgroundColor: COLORS.other,
+          borderRadius: 10
+        }]
+      },
+      options: {
+        scales: {
+          x: {
+            ticks: {
+              color: COLORS.text,
+              maxRotation: 45, // 👈 нахилено
+              minRotation: 45,
+              autoSkip: false,
+              font: { size: 12 }
             },
-            stepSize: 1
+            grid: { display: false }
+          },
+          y: {
+            beginAtZero: true,
+            ticks: {
+              color: COLORS.text,
+              callback: v => Number.isInteger(v) ? v : '',
+              stepSize: 1
+            },
+            grid: { color: 'rgba(0,0,0,0.1)' }
+          }
+        },
+        plugins: { legend: { display: false } }
+      }
+    });
+
+    // 🟢 Тренд нових
+    weeklyChart = new Chart(document.getElementById('weeklyChart'), {
+      type: 'line',
+      data: {
+        labels: Object.keys(weekly_data),
+        datasets: [{
+          label: 'Нові оголошення',
+          data: Object.values(weekly_data),
+          fill: true,
+          borderColor: COLORS.others,
+          backgroundColor: 'rgba(72, 61, 139, 0.15)',
+          tension: 0.35,
+          pointRadius: 4
+        }]
+      },
+      options: {
+        plugins: { legend: { display: false } },
+        scales: {
+          x: { ticks: { color: COLORS.text } },
+          y: {
+            beginAtZero: true,
+            ticks: {
+              color: COLORS.text,
+              callback: v => Number.isInteger(v) ? v : '',
+              stepSize: 1
+            }
           }
         }
       }
-    }
+    });
+  }
+
+  // 🕓 Завантаження початкових даних (тиждень)
+  fetch("{% url 'chart_data' %}?period=week")
+    .then(r => r.json())
+    .then(data => renderCharts(data));
+
+  // 🔘 Перемикання кнопок
+  document.querySelectorAll('[data-period]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('[data-period]').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+
+      const period = btn.dataset.period;
+      fetch("{% url 'chart_data' %}?period=" + period)
+        .then(r => r.json())
+        .then(data => renderCharts(data));
+    });
   });
 </script>
 
-<!-- 🎨 Стилі -->
 <style>
-  /* Робимо текст у всіх елементах завжди чорним */
-  body, h1, h2, h3, h4, h5, h6, p, label, .chart-card {
-    color: #000 !important;
-  }
-
-  .chart-card {
-    background-color: var(--bs-body-bg);
-    border: none;
-    transition: all 0.3s ease;
-  }
-
-  body[data-theme='dark'] .chart-card {
-    background-color: #f9f9f9; /* світліша карта навіть у темній темі */
-  }
-
+  body, .chart-card { color: #000 !important; }
+  .chart-card { background-color: var(--bs-body-bg); border: none; transition: all 0.3s ease; }
+  body[data-theme='dark'] .chart-card { background-color: #f9f9f9; }
+  .btn-group .btn.active { background-color: #0d6efd; color: #fff; }
   footer { margin-top: 80px !important; }
 </style>
-
 {% endblock %}

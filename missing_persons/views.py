@@ -11,7 +11,9 @@ from django.contrib.admin.views.decorators import staff_member_required
 from django.utils.timezone import now, timedelta
 import json
 from datetime import date
-
+from django.db.models.functions import TruncWeek, TruncMonth, TruncYear
+from django.http import JsonResponse
+from django.core.paginator import Paginator
 
 class MissingPersonViewSet(viewsets.ModelViewSet):
     queryset = MissingPerson.objects.all().order_by('-created_at')
@@ -31,28 +33,21 @@ from django.shortcuts import render, get_object_or_404, redirect
 from .forms import MissingPersonForm
 
 def home_page(request):
-    # Отримуємо значення з GET-параметрів
     query = request.GET.get('q', '').strip()
     city = request.GET.get('city', '').strip()
     date = request.GET.get('date', '').strip()
     sort = request.GET.get("sort", "").strip()
 
-    # Отримуємо всі записи
     persons = MissingPerson.objects.all().order_by('-created_at')
 
-    # 🔎 Пошук за ім'ям
     if query:
         persons = persons.filter(full_name__icontains=query)
-
-    # 🏙️ Фільтр за містом
     if city:
         persons = persons.filter(city__icontains=city)
-
-    # 📅 Фільтр за датою зникнення
     if date:
         persons = persons.filter(missing_date=date)
 
- # 🔽 Сортування
+    # 🔽 Сортування
     if sort == "name_asc":
         persons = persons.order_by("full_name")
     elif sort == "name_desc":
@@ -66,12 +61,18 @@ def home_page(request):
     else:
         persons = persons.order_by("-created_at")
 
-        
+    # ✅ Пагінація — по 9 елементів
+    paginator = Paginator(persons, 9)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
     context = {
-        'persons': persons,
+        'page_obj': page_obj,
+        'persons': page_obj.object_list,  # для зворотної сумісності
         'query': query,
         'city': city,
         'date': date,
+        'sort': sort,
     }
     return render(request, 'home.html', context)
 
@@ -138,49 +139,95 @@ def delete_missing_person(request, pk):
 
 @staff_member_required
 def admin_dashboard(request):
-    from .models import MissingPerson
-
-    # 🔹 Підрахунок за статусом
-    status_data = dict(
-        MissingPerson.objects.values_list('status')
-        .annotate(total=Count('status'))
-    )
-
-    # 🔹 Підрахунок за регіонами (топ 7)
-    region_data_qs = (
-        MissingPerson.objects.values('region')
-        .annotate(total=Count('region'))
-        .order_by('-total')[:7]
-    )
-    region_data = {r['region']: r['total'] for r in region_data_qs}
-
-    # 🔹 Нові за останній тиждень
+    """Основна сторінка аналітики (рендер шаблону)."""
     today = now().date()
     last_week = today - timedelta(days=6)
+
+    # Початкові (тижневі) дані
+    status_data = dict(
+        MissingPerson.objects.values_list("status").annotate(total=Count("status"))
+    )
+    region_data_qs = (
+        MissingPerson.objects.values("region")
+        .annotate(total=Count("region"))
+        .order_by("-total")[:7]
+    )
+    region_data = {r["region"]: r["total"] for r in region_data_qs}
+
     daily_counts = (
         MissingPerson.objects.filter(created_at__date__gte=last_week)
-        .extra({'day': "date(created_at)"})
-        .values('day')
-        .annotate(total=Count('id'))
-        .order_by('day')
+        .extra({"day": "date(created_at)"})
+        .values("day")
+        .annotate(total=Count("id"))
+        .order_by("day")
     )
+    weekly_data = {
+        (d["day"].strftime("%d.%m") if hasattr(d["day"], "strftime") else str(d["day"])): d["total"]
+        for d in daily_counts
+    }
 
-    # 🧠 Якщо 'day' — це рядок, просто залишаємо як є
-    weekly_data = {}
-    for d in daily_counts:
-        day = d['day']
-        if hasattr(day, 'strftime'):
-            formatted_day = day.strftime('%d.%m')
-        else:
-            formatted_day = str(day)
-        weekly_data[formatted_day] = d['total']
+    context = {
+        "status_data": json.dumps(status_data, ensure_ascii=False),
+        "region_data": json.dumps(region_data, ensure_ascii=False),
+        "weekly_data": json.dumps(weekly_data, ensure_ascii=False),
+    }
+    return render(request, "admin_dashboard.html", context)
 
-    
-    return render(request, 'admin_dashboard.html', {
-        'status_data': json.dumps(status_data, ensure_ascii=False),
-        'region_data': json.dumps(region_data, ensure_ascii=False),
-        'weekly_data': json.dumps(weekly_data, ensure_ascii=False),
+
+@staff_member_required
+def get_chart_data(request):
+    """AJAX-ендпоінт, який повертає JSON із потрібним періодом."""
+    period = request.GET.get("period", "week")
+    today = now().date()
+
+    # Вибираємо період
+    if period == "week":
+        start_date = today - timedelta(days=7)
+        trunc = TruncWeek
+    elif period == "month":
+        start_date = today - timedelta(days=30)
+        trunc = TruncWeek  # можна замінити на TruncMonth для більших проміжків
+    else:
+        start_date = today - timedelta(days=365)
+        trunc = TruncMonth
+
+    qs = MissingPerson.objects.filter(created_at__date__gte=start_date)
+
+    status_data = dict(qs.values_list("status").annotate(total=Count("status")))
+    region_qs = qs.values("region").annotate(total=Count("region")).order_by("-total")[:7]
+    region_data = {r["region"]: r["total"] for r in region_qs}
+
+    # Тренд у часі
+    if period == "year":
+        date_field = "month"
+        time_data = (
+            qs.annotate(month=TruncMonth("created_at"))
+            .values("month")
+            .annotate(total=Count("id"))
+            .order_by("month")
+        )
+        weekly_data = {
+            (d["month"].strftime("%b") if hasattr(d["month"], "strftime") else str(d["month"])): d["total"]
+            for d in time_data
+        }
+    else:
+        time_data = (
+            qs.annotate(week=trunc("created_at"))
+            .values("week")
+            .annotate(total=Count("id"))
+            .order_by("week")
+        )
+        weekly_data = {
+            (d["week"].strftime("%d.%m") if hasattr(d["week"], "strftime") else str(d["week"])): d["total"]
+            for d in time_data
+        }
+
+    return JsonResponse({
+        "status_data": status_data,
+        "region_data": region_data,
+        "weekly_data": weekly_data,
     })
+
 
 
 
@@ -228,6 +275,9 @@ def map_view(request):
         "persons": persons_data,
         "selected_category": category,
     })
+
+
+
 
 
 
