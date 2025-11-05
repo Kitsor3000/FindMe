@@ -71,6 +71,7 @@ INSTALLED_APPS += [
     'missing_persons',
     'comments',
     'user_messages',
+     'volunteers',
 ]
 
 

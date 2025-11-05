@@ -1,0 +1,119 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<section class="dashboard-header text-center py-5 mb-4">
+  <div class="container">
+    <h1 class="fw-bold mb-2 text-white header-title">🦺 Кабінет волонтера</h1>
+    <p class="lead opacity-75 text-white header-subtitle">
+      Ваша допомога прискорює пошук зниклих у регіоні <strong>{{ region }}</strong> 💚
+    </p>
+  </div>
+</section>
+
+
+<div class="container mb-5">
+  <!-- 🗺️ Мапа -->
+  <div id="map" style="height: 400px; border-radius: 15px;" class="mb-5 shadow-sm"></div>
+
+  <div class="card glass-card border-0 shadow-lg rounded-4 p-4">
+    <h4 class="fw-bold text-primary mb-4">📍 Зниклі у вашому регіоні</h4>
+
+    {% if persons %}
+      <div class="row g-4">
+        {% for p in persons %}
+          <div class="col-md-6 col-lg-4">
+            <div class="card shadow-sm border-0 rounded-4 h-100 person-card">
+              {% if p.photo %}
+                <img src="{{ p.photo.url }}" class="card-img-top rounded-top-4" alt="{{ p.full_name }}">
+              {% endif %}
+              <div class="card-body">
+                <h5 class="card-title fw-semibold text-primary">{{ p.full_name }}</h5>
+                <p class="text-muted small mb-1"><i class="bi bi-geo-alt"></i> {{ p.city }}, {{ p.region }}</p>
+                <p class="text-muted small mb-2"><i class="bi bi-calendar-event"></i> {{ p.missing_date }}</p>
+                <p class="mb-2"><span class="badge bg-danger">У розшуку</span></p>
+
+                {% if p.id in joined_person_ids %}
+                  <button class="btn btn-secondary btn-sm w-100" disabled>Ви вже долучились 👍</button>
+                {% else %}
+                  <form method="post" action="{% url 'join_search' p.id %}">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-success btn-sm w-100">💪 Долучитись до пошуку</button>
+                  </form>
+                {% endif %}
+              </div>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    {% else %}
+      <p class="text-center text-muted mt-3">Наразі немає активних пошуків у вашому регіоні 🙏</p>
+    {% endif %}
+  </div>
+</div>
+
+<!-- 🗺️ Leaflet -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
+{{ persons_data|json_script:"persons_json" }}
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  const data = JSON.parse(document.getElementById("persons_json").textContent);
+
+  const map = L.map("map").setView([49.0, 32.0], 6);
+  L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+    attribution: "&copy; OpenStreetMap contributors"
+  }).addTo(map);
+
+  data.forEach(p => {
+    const marker = L.marker([p.latitude, p.longitude]).addTo(map);
+    marker.bindPopup(`
+      <div style="min-width:200px; text-align:center;">
+        ${p.photo ? `<img src="${p.photo}" style="width:100%; max-height:120px; object-fit:cover; border-radius:8px;">` : ''}
+        <h6 class="fw-semibold mb-1">${p.full_name}</h6>
+        <p class="text-muted small">${p.city}</p>
+        <a href="/person/${p.id}/" class="btn btn-sm btn-outline-primary w-100">Детальніше</a>
+      </div>
+    `);
+  });
+});
+</script>
+
+<style>
+  .dashboard-header {
+    background: linear-gradient(rgba(0, 0, 0, 0.8), rgba(10, 20, 40, 0.85)),
+                url("https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?auto=format&fit=crop&w=1600&q=80") center/cover no-repeat;
+    border-radius: 0 0 50% 50% / 10%;
+    color: #fff !important;
+  }
+
+  html[data-theme="dark"] .dashboard-header {
+    background: linear-gradient(rgba(0, 0, 0, 0.8), rgba(15, 15, 15, 0.9)),
+                url("https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?auto=format&fit=crop&w=1600&q=60") center/cover no-repeat;
+  }
+
+  /* 🔹 Заголовок і підзаголовок завжди білі */
+  .dashboard-header .header-title,
+  .dashboard-header .header-subtitle,
+  .dashboard-header .header-subtitle strong {
+    color: #fff !important;
+    text-shadow: 0 2px 6px rgba(0,0,0,0.4);
+  }
+
+  .glass-card {
+    background-color: rgba(255,255,255,0.85);
+    backdrop-filter: blur(10px);
+  }
+
+  html[data-theme="dark"] .glass-card {
+    background-color: rgba(30,30,40,0.8);
+    color: #f1f1f1;
+  }
+
+  .person-card img { height: 180px; object-fit: cover; }
+  .person-card:hover { transform: translateY(-4px); box-shadow: 0 8px 20px rgba(0,0,0,0.15); transition: 0.3s; }
+  .btn-secondary[disabled] { opacity: 0.85; cursor: not-allowed; }
+</style>
+
+{% endblock %}

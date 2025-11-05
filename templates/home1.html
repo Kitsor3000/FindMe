@@ -9,7 +9,24 @@
     <p class="lead mb-4 opacity-75">Платформа для об’єднання волонтерів, родичів і небайдужих у пошуку зниклих людей по всій Україні.</p>
     <div>
       <a href="{% url 'home' %}" class="btn btn-primary btn-lg px-4 py-2 me-2">🔍 Переглянути оголошення</a>
-      <a href="{% url 'register' %}" class="btn btn-outline-light btn-lg px-4 py-2">🤝 Стати волонтером</a>
+      {% if user.is_authenticated %}
+    {% if user.volunteer_profile %}
+        <!-- Якщо користувач вже волонтер -->
+        <a href="{% url 'volunteer_dashboard' %}" class="btn btn-success btn-lg">
+            🦺 Кабінет волонтера
+        </a>
+    {% else %}
+        <!-- Якщо користувач увійшов, але ще не волонтер -->
+        <a href="{% url 'become_volunteer' %}" class="btn btn-outline-light btn-lg">
+            🤝 Стати волонтером
+        </a>
+    {% endif %}
+{% else %}
+    <!-- Якщо неавторизований -->
+    <a href="{% url 'login' %}?next={% url 'become_volunteer' %}" class="btn btn-outline-light btn-lg">
+        🤝 Стати волонтером
+    </a>
+{% endif %}
     </div>
   </div>
 </section>

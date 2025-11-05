@@ -58,6 +58,8 @@ path('person/<int:pk>/delete/', mp_views.delete_missing_person, name='delete_mis
       path("statistics/data/", mp_views.get_chart_data, name="chart_data"),
     path("map/", mp_views.map_view, name="map"),
 
+     path('volunteer/', include('volunteers.urls')),
+
 
 
 ]
