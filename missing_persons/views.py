@@ -14,6 +14,7 @@ from datetime import date
 from django.db.models.functions import TruncWeek, TruncMonth, TruncYear
 from django.http import JsonResponse
 from django.core.paginator import Paginator
+from volunteers.models import Volunteer, VolunteerParticipation
 
 class MissingPersonViewSet(viewsets.ModelViewSet):
     queryset = MissingPerson.objects.all().order_by('-created_at')
@@ -143,10 +144,12 @@ def admin_dashboard(request):
     today = now().date()
     last_week = today - timedelta(days=6)
 
-    # Початкові (тижневі) дані
+    # 📊 Дані про статуси зниклих
     status_data = dict(
         MissingPerson.objects.values_list("status").annotate(total=Count("status"))
     )
+
+    # 🗺️ Топ 7 регіонів
     region_data_qs = (
         MissingPerson.objects.values("region")
         .annotate(total=Count("region"))
@@ -154,6 +157,7 @@ def admin_dashboard(request):
     )
     region_data = {r["region"]: r["total"] for r in region_data_qs}
 
+    # 📆 Нові за останній тиждень
     daily_counts = (
         MissingPerson.objects.filter(created_at__date__gte=last_week)
         .extra({"day": "date(created_at)"})
@@ -166,11 +170,24 @@ def admin_dashboard(request):
         for d in daily_counts
     }
 
+    # 🦺 Дані про волонтерів
+    total_volunteers = Volunteer.objects.count()
+    active_volunteers = VolunteerParticipation.objects.values("volunteer").distinct().count()
+    total_participations = VolunteerParticipation.objects.count()
+
+    volunteer_stats = {
+        "total_volunteers": total_volunteers,
+        "active_volunteers": active_volunteers,
+        "participations": total_participations,
+    }
+
     context = {
         "status_data": json.dumps(status_data, ensure_ascii=False),
         "region_data": json.dumps(region_data, ensure_ascii=False),
         "weekly_data": json.dumps(weekly_data, ensure_ascii=False),
+        "volunteer_stats": volunteer_stats,
     }
+
     return render(request, "admin_dashboard.html", context)
 
 

@@ -3,8 +3,31 @@
 <div class="container py-5">
   <div class="text-center mb-5">
     <h1 class="fw-bold display-5 text-primary mb-2">📊 Панель адміністратора</h1>
-    <p class="lead text-muted">Аналітика зниклих осіб, регіонів і активності користувачів</p>
+    <p class="lead text-muted">Аналітика зниклих осіб, волонтерів та регіонів</p>
   </div>
+
+  <!-- 🦺 Волонтери -->
+  <div class="row g-4 mb-5 text-center">
+  <div class="col-md-4">
+    <div class="stat-card total rounded-4 p-4 shadow-sm">
+      <h3 class="fw-bold">{{ volunteer_stats.total_volunteers }}</h3>
+      <p class="mb-0">Усього волонтерів</p>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="stat-card active rounded-4 p-4 shadow-sm">
+      <h3 class="fw-bold">{{ volunteer_stats.active_volunteers }}</h3>
+      <p class="mb-0">Активні волонтери</p>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="stat-card participations rounded-4 p-4 shadow-sm">
+      <h3 class="fw-bold">{{ volunteer_stats.participations }}</h3>
+      <p class="mb-0">Участей у пошуках</p>
+    </div>
+  </div>
+</div>
+
 
   <!-- 🕒 Фільтр часу -->
   <div class="text-center mb-4">
@@ -75,7 +98,7 @@
       options: { plugins: { legend: { position: 'bottom', labels: { color: COLORS.text } } } }
     });
 
-    
+    // 📍 Регіони
     regionChart = new Chart(document.getElementById('regionChart'), {
       type: 'bar',
       data: {
@@ -91,7 +114,7 @@
           x: {
             ticks: {
               color: COLORS.text,
-              maxRotation: 45, 
+              maxRotation: 45,
               minRotation: 45,
               autoSkip: false,
               font: { size: 12 }
@@ -112,7 +135,7 @@
       }
     });
 
-    // 🟢 Тренд нових
+    // 🗓️ Нові оголошення
     weeklyChart = new Chart(document.getElementById('weeklyChart'), {
       type: 'line',
       data: {
@@ -144,7 +167,7 @@
     });
   }
 
-  // 🕓 Завантаження початкових даних (тиждень)
+  // 🕓 Початкове завантаження
   fetch("{% url 'chart_data' %}?period=week")
     .then(r => r.json())
     .then(data => renderCharts(data));
@@ -154,7 +177,6 @@
     btn.addEventListener('click', () => {
       document.querySelectorAll('[data-period]').forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
-
       const period = btn.dataset.period;
       fetch("{% url 'chart_data' %}?period=" + period)
         .then(r => r.json())
@@ -164,6 +186,37 @@
 </script>
 
 <style>
+  /* 🔹 Усього волонтерів — небесний синій */
+  .stat-card.total {
+    background: linear-gradient(135deg, #f6c73bc4, #eba625c3);
+    color: #fff;
+  }
+
+  /* 🔹 Активні волонтери — яскраво зелений */
+  .stat-card.active {
+    background: linear-gradient(135deg, #22c55e, #16a34a);
+    color: #fff;
+  }
+
+  /* 🔹 Участей у пошуках — бірюзовий */
+  .stat-card.participations {
+    background: linear-gradient(135deg, #14b8a6, #0d9488);
+    color: #fff;
+  }
+
+  /* 🌀 Ефект наведення */
+  .stat-card {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    border: none;
+  }
+
+  .stat-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+  }
+  /* Волонтери */
+  
+
   body, .chart-card { color: #000 !important; }
   .chart-card { background-color: var(--bs-body-bg); border: none; transition: all 0.3s ease; }
   body[data-theme='dark'] .chart-card { background-color: #f9f9f9; }
