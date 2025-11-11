@@ -15,6 +15,16 @@ from django.db.models.functions import TruncWeek, TruncMonth, TruncYear
 from django.http import JsonResponse
 from django.core.paginator import Paginator
 from volunteers.models import Volunteer, VolunteerParticipation
+from django.http import JsonResponse
+
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import AllowAny
+from rest_framework.response import Response
+from .models import MissingPerson
+
+
+
+
 
 class MissingPersonViewSet(viewsets.ModelViewSet):
     queryset = MissingPerson.objects.all().order_by('-created_at')
@@ -48,7 +58,7 @@ def home_page(request):
     if date:
         persons = persons.filter(missing_date=date)
 
-    # 🔽 Сортування
+    #  Сортування
     if sort == "name_asc":
         persons = persons.order_by("full_name")
     elif sort == "name_desc":
@@ -62,14 +72,14 @@ def home_page(request):
     else:
         persons = persons.order_by("-created_at")
 
-    # ✅ Пагінація — по 9 елементів
+    # Пагінація — по 9 елементів
     paginator = Paginator(persons, 9)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
 
     context = {
         'page_obj': page_obj,
-        'persons': page_obj.object_list,  # для зворотної сумісності
+        'persons': page_obj.object_list,  
         'query': query,
         'city': city,
         'date': date,
@@ -144,12 +154,12 @@ def admin_dashboard(request):
     today = now().date()
     last_week = today - timedelta(days=6)
 
-    # 📊 Дані про статуси зниклих
+    #  Дані про статуси зниклих
     status_data = dict(
         MissingPerson.objects.values_list("status").annotate(total=Count("status"))
     )
 
-    # 🗺️ Топ 7 регіонів
+    #  Топ 7 регіонів
     region_data_qs = (
         MissingPerson.objects.values("region")
         .annotate(total=Count("region"))
@@ -157,7 +167,7 @@ def admin_dashboard(request):
     )
     region_data = {r["region"]: r["total"] for r in region_data_qs}
 
-    # 📆 Нові за останній тиждень
+    #  Нові за останній тиждень
     daily_counts = (
         MissingPerson.objects.filter(created_at__date__gte=last_week)
         .extra({"day": "date(created_at)"})
@@ -170,7 +180,7 @@ def admin_dashboard(request):
         for d in daily_counts
     }
 
-    # 🦺 Дані про волонтерів
+    # Дані про волонтерів
     total_volunteers = Volunteer.objects.count()
     active_volunteers = VolunteerParticipation.objects.values("volunteer").distinct().count()
     total_participations = VolunteerParticipation.objects.count()
@@ -191,6 +201,9 @@ def admin_dashboard(request):
     return render(request, "admin_dashboard.html", context)
 
 
+
+
+
 @staff_member_required
 def get_chart_data(request):
     """AJAX-ендпоінт, який повертає JSON із потрібним періодом."""
@@ -203,7 +216,7 @@ def get_chart_data(request):
         trunc = TruncWeek
     elif period == "month":
         start_date = today - timedelta(days=30)
-        trunc = TruncWeek  # можна замінити на TruncMonth для більших проміжків
+        trunc = TruncWeek  
     else:
         start_date = today - timedelta(days=365)
         trunc = TruncMonth
@@ -213,6 +226,7 @@ def get_chart_data(request):
     status_data = dict(qs.values_list("status").annotate(total=Count("status")))
     region_qs = qs.values("region").annotate(total=Count("region")).order_by("-total")[:7]
     region_data = {r["region"]: r["total"] for r in region_qs}
+
 
     # Тренд у часі
     if period == "year":
@@ -252,7 +266,7 @@ def get_chart_data(request):
 def map_view(request):
     category = request.GET.get('category', 'all')
 
-    # 🔹 Мапа відповідності між українськими назвами та кодами з моделі
+    #  Мапа відповідності між українськими назвами та кодами з моделі
     category_map = {
         "Дитина": "child",
         "Дорослий": "adult",
@@ -262,7 +276,7 @@ def map_view(request):
         "Інше": "other",
     }
 
-    # 🔹 Фільтрація за категорією
+    # Фільтрація за категорією
     if category == 'all':
         persons = MissingPerson.objects.all()
     else:
@@ -272,7 +286,7 @@ def map_view(request):
         else:
             persons = MissingPerson.objects.none()
 
-    # 🔹 Формування списку даних для карти
+    # Формування списку даних для карти
     persons_data = []
     for p in persons:
         if p.latitude and p.longitude:
@@ -331,3 +345,11 @@ def home_view(request):
     }
 
     return render(request, "home1.html", context)
+
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def api_missing_persons_list(request):
+    persons = MissingPerson.objects.all().values(
+        'id', 'full_name', 'status', 'city', 'region', 'category', 'missing_date'
+    )
+    return Response({'persons': list(persons)})

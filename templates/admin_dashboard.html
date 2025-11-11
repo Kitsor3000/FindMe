@@ -6,7 +6,7 @@
     <p class="lead text-muted">Аналітика зниклих осіб, волонтерів та регіонів</p>
   </div>
 
-  <!-- 🦺 Волонтери -->
+  <!--  Волонтери -->
   <div class="row g-4 mb-5 text-center">
   <div class="col-md-4">
     <div class="stat-card total rounded-4 p-4 shadow-sm">
@@ -29,7 +29,7 @@
 </div>
 
 
-  <!-- 🕒 Фільтр часу -->
+  <!-- Фільтр часу -->
   <div class="text-center mb-4">
     <div class="btn-group" role="group">
       <button type="button" class="btn btn-outline-primary active" data-period="week">Тиждень</button>
@@ -38,7 +38,7 @@
     </div>
   </div>
 
-  <!-- 📈 Графіки -->
+  <!--  Графіки -->
   <div class="row g-4">
     <div class="col-lg-6">
       <div class="chart-card p-4 rounded-4 shadow-sm">
@@ -76,7 +76,7 @@
 
   let statusChart, regionChart, weeklyChart;
 
-  // ⚙️ Функція рендеру діаграм
+  // Функція рендеру діаграм
   function renderCharts(data) {
     const { status_data, region_data, weekly_data } = data;
 
@@ -84,7 +84,7 @@
     if (regionChart) regionChart.destroy();
     if (weeklyChart) weeklyChart.destroy();
 
-    // 🟣 Статуси
+    // Статуси
     statusChart = new Chart(document.getElementById('statusChart'), {
       type: 'doughnut',
       data: {
@@ -98,7 +98,7 @@
       options: { plugins: { legend: { position: 'bottom', labels: { color: COLORS.text } } } }
     });
 
-    // 📍 Регіони
+    //  Регіони
     regionChart = new Chart(document.getElementById('regionChart'), {
       type: 'bar',
       data: {
@@ -135,7 +135,7 @@
       }
     });
 
-    // 🗓️ Нові оголошення
+    // Нові оголошення
     weeklyChart = new Chart(document.getElementById('weeklyChart'), {
       type: 'line',
       data: {
@@ -167,12 +167,12 @@
     });
   }
 
-  // 🕓 Початкове завантаження
+  //  Початкове завантаження
   fetch("{% url 'chart_data' %}?period=week")
     .then(r => r.json())
     .then(data => renderCharts(data));
 
-  // 🔘 Перемикання кнопок
+  //  Перемикання кнопок
   document.querySelectorAll('[data-period]').forEach(btn => {
     btn.addEventListener('click', () => {
       document.querySelectorAll('[data-period]').forEach(b => b.classList.remove('active'));
@@ -186,25 +186,25 @@
 </script>
 
 <style>
-  /* 🔹 Усього волонтерів — небесний синій */
+  /*  Усього волонтерів — небесний синій */
   .stat-card.total {
     background: linear-gradient(135deg, #f6c73bc4, #eba625c3);
     color: #fff;
   }
 
-  /* 🔹 Активні волонтери — яскраво зелений */
+  /*  Активні волонтери — яскраво зелений */
   .stat-card.active {
     background: linear-gradient(135deg, #22c55e, #16a34a);
     color: #fff;
   }
 
-  /* 🔹 Участей у пошуках — бірюзовий */
+  /* Участей у пошуках — бірюзовий */
   .stat-card.participations {
     background: linear-gradient(135deg, #14b8a6, #0d9488);
     color: #fff;
   }
 
-  /* 🌀 Ефект наведення */
+  /*  Ефект наведення */
   .stat-card {
     transition: transform 0.3s ease, box-shadow 0.3s ease;
     border: none;
@@ -214,7 +214,7 @@
     transform: translateY(-4px);
     box-shadow: 0 8px 20px rgba(0,0,0,0.2);
   }
-  /* Волонтери */
+  
   
 
   body, .chart-card { color: #000 !important; }

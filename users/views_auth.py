@@ -24,12 +24,12 @@ def login_view(request):
                 # Перевіряємо пароль
                 user = authenticate(request, username=user_obj.username, password=password)
                 if user is not None:
-                    # ✅ Якщо профілю ще немає — створюємо його
+                    # Якщо профілю ще немає — створюємо його
                     if not hasattr(user, "profile"):
                         UserProfile.objects.create(user=user)
 
                     login(request, user)
-                    return redirect("home")
+                    return redirect("home1")
                 else:
                     error_message = "❌ Невірний пароль."
             else:

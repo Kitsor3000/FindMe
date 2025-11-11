@@ -18,12 +18,33 @@ def become_volunteer(request):
             volunteer = form.save(commit=False)
             volunteer.user = request.user
             volunteer.save()
+
+            profile = request.user.profile
+            profile.role = 'volunteer'
+            profile.save()
+            
             messages.success(request, "✅ Ви стали волонтером FindMe!")
             return redirect("volunteer_dashboard")
     else:
         form = VolunteerApplyForm()
 
     return render(request, "volunteer_apply.html", {"form": form})
+
+
+@login_required
+def stop_being_volunteer(request):
+    """Припинити бути волонтером"""
+    if hasattr(request.user, "volunteer_profile"):
+        request.user.volunteer_profile.delete()
+        
+        profile = request.user.profile
+        profile.role = 'user'
+        profile.save()
+        messages.warning(request, "❌ Ви більше не є волонтером.")
+    else:
+        messages.info(request, "Ви не є волонтером.")
+
+    return redirect("profile")  
 
 
 @login_required
@@ -35,7 +56,7 @@ def volunteer_dashboard(request):
 
     region = volunteer.volunteer_profile.region
 
-    # ❗ Показуємо лише зниклих ("missing")
+    # Показуємо лише зниклих ("missing")
     persons = MissingPerson.objects.filter(
         region__icontains=region,
         status="missing"

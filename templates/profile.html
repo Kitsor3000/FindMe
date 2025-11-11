@@ -1,12 +1,17 @@
 {% extends 'base.html' %}
 {% block content %}
 
- 
 <div class="container mt-5 mb-5">
   <div class="row justify-content-center">
     <div class="col-lg-6">
       <div class="card p-4 shadow-sm rounded-4 border-0 profile-card">
-        <h3 class="text-center mb-4 fw-bold text-primary">👤 Мій профіль</h3>
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h3 class="fw-bold text-primary">👤 Мій профіль</h3>
+          
+          {% if profile.role == "volunteer" %}
+            <span class="badge bg-success px-3 py-2 fs-6">Волонтер</span>
+          {% endif %}
+        </div>
 
         <form method="post" enctype="multipart/form-data">
           {% csrf_token %}
@@ -55,6 +60,10 @@
           <button type="submit" class="btn btn-primary w-100 mt-3">💾 Зберегти зміни</button>
         </form>
 
+        {% if profile.role == "volunteer" %}
+          <a href="{% url 'stop_being_volunteer' %}" class="btn btn-outline-danger w-100 mt-3">🚫 Перестати бути волонтером</a>
+        {% endif %}
+
         <hr class="my-4">
         <div class="text-center text-muted">
           <p>📄 Оголошень створено: <strong>{{ total_posts }}</strong></p>
@@ -80,29 +89,25 @@
   });
 </script>
 
-<!-- 🎨 Тема через CSS-змінні -->
 <style>
-  /* 🎨 Базові кольори (світла тема) */
   :root {
     --bg-color: #ffffff;
     --label-text-color: #212529;     
-  --input-text-color: #212529;
+    --input-text-color: #212529;
     --input-bg: #f8f9fa;
     --input-border: rgba(180,180,180,0.4);
     --card-bg: #ffffff;
   }
 
-  /* 🌙 Темна тема */
   [data-theme='dark'] {
     --bg-color: #050920;
-     --label-text-color: #ffffff;
-  --input-text-color: #030303;
+    --label-text-color: #ffffff;
+    --input-text-color: #030303;
     --input-bg: #989898;
     --input-border: #444;
     --card-bg: #202845;
   }
 
-  /* 📋 Використання змінних */
   body {
     background-color: var(--bg-color);
     color: var(--label-text-color);
@@ -114,8 +119,9 @@
     transition: background-color 0.3s ease, color 0.3s ease;
   }
 
-  label.form-label {
-    color: var(--label-text-color);
+  .badge.bg-success {
+    font-weight: 600;
+    border-radius: 10px;
   }
 
   input, textarea {
@@ -139,4 +145,5 @@
     background: linear-gradient(135deg, #0056d2, #0041a3);
   }
 </style>
+
 {% endblock %}

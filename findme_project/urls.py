@@ -43,7 +43,7 @@ urlpatterns = [
     path('person/<int:pk>/edit/', mp_views.edit_missing_person, name='edit_missing'),
 path('person/<int:pk>/delete/', mp_views.delete_missing_person, name='delete_missing'),
 
-    # JWT + API маршрути
+    
     path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
 
@@ -59,6 +59,9 @@ path('person/<int:pk>/delete/', mp_views.delete_missing_person, name='delete_mis
     path("map/", mp_views.map_view, name="map"),
 
      path('volunteer/', include('volunteers.urls')),
+
+      path('api/', include('missing_persons.urls')),
+    
 
 
 

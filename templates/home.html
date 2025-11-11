@@ -12,7 +12,7 @@
     </a>
   </div>
 
-  <!-- 🔎 Пошук, фільтри та сортування -->
+  <!-- Пошук, фільтри та сортування -->
   <form method="get" id="searchForm" class="row g-3 justify-content-center mb-5">
     <div class="col-md-3 col-sm-6">
       <input type="text" name="q" value="{{ query }}" class="form-control rounded-3"
@@ -28,7 +28,7 @@
       <input type="date" name="date" value="{{ date }}" class="form-control rounded-3">
     </div>
 
-    <!-- 🧭 Сортування -->
+    <!--  Сортування -->
     <div class="col-md-3 col-sm-6">
       <select name="sort" id="sortSelect" class="form-select rounded-3">
         <option value="">Сортувати за...</option>
@@ -47,7 +47,7 @@
     </div>
   </form>
 
-  <!-- 🧾 Результати -->
+  <!-- Результати -->
   <div class="row g-4">
     {% for person in page_obj %}
       <div class="col-md-4">
@@ -64,7 +64,7 @@
               <i class="bi bi-calendar-event"></i> {{ person.missing_date }}
             </p>
 
-            <!-- 🏷️ Категорія + статус -->
+            <!--  Категорія + статус -->
             <p class="mb-3">
               {% if person.category %}
                 <span class="badge bg-info text-dark">{{ person.get_category_display }}</span>
@@ -87,7 +87,7 @@
     {% endfor %}
   </div>
 
-  <!-- 📄 Пагінація -->
+  <!-- Пагінація -->
   {% if page_obj.has_other_pages %}
   <div class="d-flex justify-content-center mt-5">
     <ul class="pagination">
@@ -117,7 +117,7 @@
   {% endif %}
 </div>
 
-<!-- 💡 JS: автоматичне оновлення при зміні сортування -->
+<!-- JS: автоматичне оновлення при зміні сортування -->
 <script>
   document.getElementById('sortSelect').addEventListener('change', function() {
     document.getElementById('searchForm').submit();

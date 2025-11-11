@@ -2,7 +2,7 @@
 {% load static %}
 {% block content %}
 
-<!-- 🌍 Hero Section -->
+
 <section class="hero d-flex align-items-center text-center text-white fade-in">
   <div class="container py-5">
     <h1 class="display-4 fw-bold mb-3">FindMe — разом ми повертаємо людей додому</h1>
@@ -11,18 +11,18 @@
       <a href="{% url 'home' %}" class="btn btn-primary btn-lg px-4 py-2 me-2">🔍 Переглянути оголошення</a>
       {% if user.is_authenticated %}
     {% if user.volunteer_profile %}
-        <!-- Якщо користувач вже волонтер -->
+        
         <a href="{% url 'volunteer_dashboard' %}" class="btn btn-success btn-lg">
             🦺 Кабінет волонтера
         </a>
     {% else %}
-        <!-- Якщо користувач увійшов, але ще не волонтер -->
+        
         <a href="{% url 'become_volunteer' %}" class="btn btn-outline-light btn-lg">
             🤝 Стати волонтером
         </a>
     {% endif %}
 {% else %}
-    <!-- Якщо неавторизований -->
+    
     <a href="{% url 'login' %}?next={% url 'become_volunteer' %}" class="btn btn-outline-light btn-lg">
         🤝 Стати волонтером
     </a>
@@ -31,7 +31,7 @@
   </div>
 </section>
 
-<!-- 📰 Останні новини -->
+<!-- Останні новини -->
 <section class="news py-5 fade-in">
   <div class="container">
     <h2 class="fw-bold text-center mb-5">🗞️ Останні новини</h2>
@@ -51,7 +51,7 @@
   </div>
 </section>
 
-<!-- 📈 Статистика -->
+<!-- Статистика -->
 <section class="stats text-center py-5 fade-in">
   <div class="container">
     <div class="row justify-content-center g-4">
@@ -77,7 +77,7 @@
   </div>
 </section>
 
-<!-- 🤝 CTA -->
+<!-- CTA -->
 <section class="cta text-center py-5 fade-in">
   <div class="container">
     <h2 class="fw-bold mb-3">Приєднуйтесь до FindMe</h2>
@@ -87,7 +87,7 @@
 </section>
 
 <style>
-  /* 🌄 Hero */
+  /* Hero */
   .hero {
     background: linear-gradient(rgba(10, 15, 30, 0.55), rgba(10, 15, 30, 0.65)),
                 url("{% static 'images/hero-bg.jpg' %}") center/cover no-repeat;
@@ -98,11 +98,11 @@
   }
 
   html[data-theme="dark"] .hero {
-    filter: brightness(1.15); /* фото стає трохи яскравішим */
-    color: #fff !important; /* текст залишається білим */
+    filter: brightness(1.15); 
+    color: #fff !important; 
   }
 
-  /* 🗞️ Новини */
+  
   .glass-card {
     backdrop-filter: blur(16px);
     background-color: rgba(255,255,255,0.7);
@@ -126,7 +126,7 @@
     object-fit: cover;
   }
 
-  /* 📊 Статистика */
+
   .stats {
     border-radius: 24px;
     background: linear-gradient(120deg, #1651d0, #03d697);
@@ -146,7 +146,7 @@
     background: rgba(255,255,255,0.2);
   }
 
-  /* 🤝 CTA */
+
   .cta {
     background: linear-gradient(120deg, #e9f2ff, #f8fff8);
     border-radius: 20px;
@@ -156,7 +156,7 @@
     background: linear-gradient(120deg, #101828, #1e1e2e);
   }
 
-  /* ✨ Анімації */
+
   .fade-in {
     opacity: 0;
     transform: translateY(20px);
@@ -165,7 +165,7 @@
   .hero h1,
 .hero p {
   color: #ffffff !important;
-  text-shadow: 0 2px 6px rgba(0,0,0,0.4); /* легка тінь для контрасту */
+  text-shadow: 0 2px 6px rgba(0,0,0,0.4); 
 }
 
   @keyframes fadeInUp {

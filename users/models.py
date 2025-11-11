@@ -8,7 +8,6 @@ class UserProfile(models.Model):
     ROLE_CHOICES = [
         ('user', 'Користувач'),
         ('volunteer', 'Волонтер'),
-        ('police', 'Поліція'),
         ('admin', 'Адміністратор'),
     ]
 

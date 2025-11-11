@@ -16,7 +16,7 @@ def register_view(request):
             user.save()
             login(request, user)
             messages.success(request, f'👋 Вітаємо, {user.username}! Ви успішно зареєструвалися.')
-            return redirect('home')
+            return redirect('home1')
         else:
             for field, errors in form.errors.items():
                 for error in errors:

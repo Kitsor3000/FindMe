@@ -3,7 +3,7 @@
 <div class="container-fluid mt-4 mb-5 position-relative">
   <h2 class="text-center fw-bold mb-4 text-primary">🗺️ Мапа зниклих людей</h2>
 
-  <!-- 🔹 Панель фільтрів (замість select, але з Django GET логікою) -->
+ 
   <div class="filters text-center mb-3">
     <button class="btn btn-outline-primary m-1" data-category="all">🌍 Усі</button>
     <button class="btn btn-outline-warning m-1" data-category="Дитина">👶 Діти</button>
@@ -13,10 +13,10 @@
     <button class="btn btn-outline-light border m-1" data-category="Людина з інвалідністю">♿ Інвалідність</button>
   </div>
 
-  <!-- 🗺️ Мапа -->
+  
   <div id="map" style="height: 75vh; border-radius: 12px; overflow:hidden;"></div>
 
-  <!-- 🗒️ Легенда -->
+  <!--Легенда -->
   <div id="legend" class="card shadow p-2 position-absolute bottom-0 end-0 m-3"
        style="z-index:1000; font-size:0.9em; color:#000;">
     <strong style="color:#000;">🔎 Статус:</strong><br>
@@ -26,7 +26,7 @@
   </div>
 </div>
 
-<!-- ✅ Leaflet і MarkerCluster -->
+<!--  Leaflet і MarkerCluster -->
 <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
 <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 
@@ -34,23 +34,23 @@
 <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster/dist/MarkerCluster.css" />
 <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster/dist/MarkerCluster.Default.css" />
 
-<!-- ✅ Безпечна передача даних -->
+<!-- Безпечна передача даних -->
 {{ persons|json_script:"persons_data" }}
 
 <script>
 document.addEventListener("DOMContentLoaded", function() {
   const personsData = JSON.parse(document.getElementById("persons_data").textContent);
 
-  // 🗺️ Карта
+  // Карта
   const map = L.map("map").setView([49.0, 32.0], 6);
   L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
     attribution: '&copy; OpenStreetMap contributors'
   }).addTo(map);
 
-  // 🧩 Кластер група
+  // Кластер група
   const markers = L.markerClusterGroup();
 
-  // 🪶 Додаємо мітки
+  // Додаємо мітки
   personsData.forEach(p => {
     if (p.latitude && p.longitude) {
       const color =
@@ -84,13 +84,13 @@ document.addEventListener("DOMContentLoaded", function() {
 
   map.addLayer(markers);
 
-  // 🧭 Логіка фільтрації через Django GET параметр
+  // Логіка фільтрації через Django GET параметр
   const currentCategory = new URLSearchParams(window.location.search).get("category") || "all";
 
   document.querySelectorAll(".filters button").forEach(btn => {
     const btnCategory = btn.dataset.category;
 
-    // підсвічуємо активну кнопку
+  
     if (btnCategory === currentCategory) {
       btn.classList.remove("btn-outline-*");
       btn.classList.add("btn-primary", "text-white");
@@ -107,13 +107,13 @@ document.addEventListener("DOMContentLoaded", function() {
 </script>
 
 <style>
-  /* 🌗 Темна тема — інверсія карти */
+  /* Темна тема — інверсія карти */
   body[data-theme="dark"] #map {
     filter: invert(0.9) hue-rotate(180deg) brightness(0.9);
     transition: filter 0.6s ease;
   }
 
-  /* 🎨 Кнопки */
+  /*  Кнопки */
   .filters button {
     border-radius: 8px;
     min-width: 110px;
@@ -124,14 +124,14 @@ document.addEventListener("DOMContentLoaded", function() {
     transform: translateY(-2px);
   }
 
-  /* ♿ Кнопка "Інвалідність" — контрастна у темній темі */
+  /* Кнопка "Інвалідність" — контрастна у темній темі */
   body[data-theme="dark"] .filters button[data-category="Людина з інвалідністю"] {
     background-color: #555 !important;
     color: #fff !important;
     border-color: #777 !important;
   }
 
-  /* 🗒️ Попап */
+  /* Попап */
   .leaflet-popup-content-wrapper,
   .leaflet-popup-tip {
     background: #fff !important;
@@ -144,7 +144,7 @@ document.addEventListener("DOMContentLoaded", function() {
     color: #000 !important;
   }
 
-  /* 🌀 Hover-анімація */
+  /*  Hover-анімація */
   .leaflet-interactive:hover {
     cursor: pointer;
     stroke-width: 2;
@@ -152,7 +152,7 @@ document.addEventListener("DOMContentLoaded", function() {
     r: 10 !important;
   }
 
-  /* 🧭 Легенда */
+  /* Легенда */
   #legend {
     backdrop-filter: blur(8px);
     background-color: rgba(255,255,255,0.9);
